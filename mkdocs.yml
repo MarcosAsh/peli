@@ -1,0 +1,39 @@
+site_name: peli
+site_url: https://marcosash.github.io/peli/
+repo_url: https://github.com/MarcosAsh/peli
+repo_name: MarcosAsh/peli
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: black
+      toggle: { icon: material/weather-night, name: switch to dark }
+    - scheme: slate
+      primary: black
+      toggle: { icon: material/weather-sunny, name: switch to light }
+
+nav:
+  - Overview: index.md
+  - API: api.md
+  - Migrating from decord: migrating-from-decord.md
+  - HuggingFace datasets: integrations/huggingface-datasets.md
+  - Contributing: contributing.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - tables
+  - toc:
+      permalink: true

@@ -56,3 +56,6 @@ compile_commands.json
 dist/
 
 tests/data/corpus/
+
+# mkdocs build output
+site/

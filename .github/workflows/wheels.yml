@@ -57,18 +57,24 @@ jobs:
           name: sdist
           path: dist/*.tar.gz
 
-  # publish:
-  #   name: publish to PyPI
-  #   needs: [build_wheels, build_sdist]
-  #   runs-on: ubuntu-latest
-  #   if: startsWith(github.ref, 'refs/tags/v')
-  #   environment: pypi
-  #   permissions:
-  #     id-token: write
-  #   steps:
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         path: dist
-  #         pattern: "wheels-* sdist"
-  #         merge-multiple: true
-  #     - uses: pypa/gh-action-pypi-publish@release/v1
+  publish:
+    name: publish to PyPI
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/peli
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: "wheels-*"
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          name: sdist
+      - uses: pypa/gh-action-pypi-publish@release/v1
