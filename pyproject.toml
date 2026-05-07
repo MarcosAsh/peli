@@ -49,21 +49,31 @@ build-verbosity = 1
 test-command = "python -c \"import peli; vr = peli.VideoReader(r'{project}/examples/count.mov'); assert len(vr) == 143; print('ok', len(vr), 'frames')\""
 
 [tool.cibuildwheel.linux]
-# manylinux_2_28 has FFmpeg available via the AlmaLinux 8 dnf repos (with EPEL/RPMFusion).
-# We install FFmpeg dev headers in before-all, build against them, then auditwheel
-# vendors the resulting .so dependencies into the wheel.
+# manylinux_2_28's EPEL ships FFmpeg 4.x, which predates the libavcodec/bsf.h
+# split (FFmpeg 5.0). peli requires FFmpeg 5+, so we build a minimal LGPL
+# FFmpeg from source in before-all instead. Build cost is amortized across
+# the per-Python-version wheel matrix because before-all runs once per OS.
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
+environment = { PKG_CONFIG_PATH = "/usr/local/lib/pkgconfig", LD_LIBRARY_PATH = "/usr/local/lib" }
 before-all = [
-    "dnf install -y epel-release || true",
-    "dnf install -y --enablerepo=powertools ffmpeg-devel || dnf install -y ffmpeg-devel || (curl -L https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm -o rpmfusion.rpm && dnf install -y rpmfusion.rpm && dnf install -y ffmpeg-devel)",
+    "dnf install -y nasm yasm",
+    "curl -fsSL https://www.ffmpeg.org/releases/ffmpeg-7.1.tar.xz -o /tmp/ffmpeg.tar.xz",
+    "cd /tmp && tar xf ffmpeg.tar.xz",
+    "cd /tmp/ffmpeg-7.1 && ./configure --prefix=/usr/local --enable-shared --disable-static --disable-doc --disable-programs --disable-debug --disable-gpl --disable-nonfree",
+    "cd /tmp/ffmpeg-7.1 && make -j$(nproc) && make install",
+    "ldconfig",
 ]
 repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
-# Use Homebrew's FFmpeg. delocate (cibuildwheel's macOS repair) vendors the dylibs.
+# Homebrew's current FFmpeg dylibs target macOS 14.0, so the wheel's
+# deployment target must match or be higher (delocate refuses otherwise).
+# This excludes macOS <14, which we accept for v0.1 — most ML users on
+# Apple Silicon are on Sonoma+ anyway. Future option: build FFmpeg from
+# source to lower the target.
 before-all = ["brew install ffmpeg"]
-environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+environment = { MACOSX_DEPLOYMENT_TARGET = "14.0" }
 archs = ["x86_64", "arm64"]
 
 [tool.cibuildwheel.windows]
