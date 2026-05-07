@@ -23,7 +23,7 @@ A video decoder for ML training pipelines. Open a video, index into it, get back
 | DLPack output (`__dlpack__`) for torch / jax / tf / keras zero-copy | working                                 |
 | `output="numpy"` / `"dlpack"` constructor kwarg                     | working                                 |
 | `output="torch"` / `"jax"` / `"tf"` / `"keras"` constructor kwarg   | working (lazy import; not unit-tested)  |
-| `AudioReader` (FFmpeg 7+ channel-layout migration done, untested)   | v0.2                                    |
+| `AudioReader` (FFmpeg 7+ channel-layout migration verified)         | working                                 |
 | NVDEC GPU decode (CUDA 12+, returns CUDA tensors via DLPack)        | v0.2 (verified: L4 + torch.from_dlpack) |
 | VideoToolbox / AMD GPU decode                                       | v0.3+                                   |
 | Cross-platform wheels (`pip install peli`)                          | v0.1+                                   |
