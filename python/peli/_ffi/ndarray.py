@@ -27,6 +27,35 @@ except IMPORT_EXCEPT:
     from ._ctypes.ndarray import _set_class_ndarray, _reg_extension, _make_array, _from_dlpack
     from ._ctypes.ndarray import NDArrayBase as _NDArrayBase
 
+_CUDART = None
+
+
+def _cuda_device_synchronize():
+    """Best-effort cudaDeviceSynchronize() via libcudart, lazy-loaded.
+
+    On CPU-only systems libcudart is absent and this becomes a no-op. We
+    never raise from here: the worst case is the existing pre-stream-sync
+    behavior, which is correct when the producer is idle (the common case).
+    """
+    global _CUDART
+    if _CUDART is False:
+        return
+    if _CUDART is None:
+        for candidate in ("libcudart.so", "libcudart.so.12", "libcudart.so.11.0"):
+            try:
+                _CUDART = ctypes.CDLL(candidate)
+                break
+            except OSError:
+                continue
+        else:
+            _CUDART = False
+            return
+    try:
+        _CUDART.cudaDeviceSynchronize()
+    except Exception:
+        pass
+
+
 def context(dev_type, dev_id=0):
     """Construct a PELI context with given device type and id.
 
@@ -242,10 +271,20 @@ class NDArrayBase(_NDArrayBase):
     def __str__(self):
         return str(self.asnumpy())
 
-    def __dlpack__(self, stream=None):
-        # DLPack v0.5+ accepts a stream arg for CUDA synchronization. peli's
-        # buffers are CPU-only in v0.1 so the arg is ignored. Once GPU decode
-        # lands, honor the stream by syncing the source decode stream into it.
+    def __dlpack__(self, stream=None, max_version=None, dl_device=None, copy=None):
+        # DLPack v0.5+ accepts a stream arg so the producer can synchronize
+        # the consumer's stream with the producer's work. For CUDA buffers,
+        # we conservatively cudaDeviceSynchronize() to guarantee that any
+        # pending decode/conversion on the producer stream is complete before
+        # the consumer adopts the pointer. This is a heavier hammer than a
+        # per-stream cudaStreamWaitEvent, but it's correct and cheap when
+        # the producer is already idle (the common case for vr[i] which
+        # waits for the decode result before returning).
+        # Future v0.2.x optimization: record an event on the producer stream
+        # at NDArray construction time and make the consumer's stream wait
+        # on it instead of a global sync.
+        if self.ctx.device_type == 2:  # kDLCUDA
+            _cuda_device_synchronize()
         return self.to_dlpack()
 
     def __dlpack_device__(self):
