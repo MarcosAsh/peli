@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8.2)
-project(decord C CXX)
+project(peli C CXX)
 
 # Utility functions
 include(cmake/util/Util.cmake)
@@ -19,12 +19,12 @@ endif()
 # You can create a config.cmake at build folder
 # and add set(OPTION VALUE) to override these build options.
 # Alernatively, use cmake -DOPTION=VALUE through command-line.
-decord_option(USE_CUDA "Build with CUDA" OFF)
-decord_option(USE_MSVC_MT "Build with MT" OFF)
+peli_option(USE_CUDA "Build with CUDA" OFF)
+peli_option(USE_MSVC_MT "Build with MT" OFF)
 
 # Project
 if(USE_CUDA)
-project(decord C CXX CUDA)
+project(peli C CXX CUDA)
 endif(USE_CUDA)
 
 # include directories
@@ -33,7 +33,7 @@ include_directories("3rdparty/dlpack/include")
 include_directories("3rdparty/dmlc-core/include")
 
 # initial variables
-set(DECORD_LINKER_LIBS "")
+set(PELI_LINKER_LIBS "")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 cmake_policy(SET CMP0042 NEW)
 
@@ -85,7 +85,7 @@ assign_source_group("Source" ${GROUP_SOURCE})
 assign_source_group("Include" ${GROUP_INCLUDE})
 
 # Source file lists
-file(GLOB DECORD_CORE_SRCS src/*.cc src/runtime/*.cc src/video/*.cc src/sampler/*.cc src/audio/*.cc src/av_wrapper/*.cc)
+file(GLOB PELI_CORE_SRCS src/*.cc src/runtime/*.cc src/video/*.cc src/sampler/*.cc src/audio/*.cc src/av_wrapper/*.cc)
 
 # Module rules
 include(cmake/modules/FFmpeg.cmake)
@@ -93,16 +93,16 @@ include(cmake/modules/CUDA.cmake)
 
 # Targets
 
-add_library(decord SHARED ${DECORD_CORE_SRCS} ${DECORD_FFMPEG_SRCS} ${NVDEC_SRCS} ${RUNTIME_CUDA_SRCS} ${NVDEC_CUDA_SRCS})
+add_library(peli SHARED ${PELI_CORE_SRCS} ${PELI_FFMPEG_SRCS} ${NVDEC_SRCS} ${RUNTIME_CUDA_SRCS} ${NVDEC_CUDA_SRCS})
 
-# target_compile_features(decord PUBLIC cxx_std_11)
+# target_compile_features(peli PUBLIC cxx_std_11)
 
-target_link_libraries(decord ${DECORD_LINKER_LIBS} ${DECORD_RUNTIME_LINKER_LIBS})
-set_property(TARGET decord PROPERTY CUDA_STANDARD 11)
+target_link_libraries(peli ${PELI_LINKER_LIBS} ${PELI_RUNTIME_LINKER_LIBS})
+set_property(TARGET peli PROPERTY CUDA_STANDARD 11)
 
 # More target definitions
 if(MSVC)
-  target_compile_definitions(decord PRIVATE -DDECORD_EXPORTS)
+  target_compile_definitions(peli PRIVATE -DPELI_EXPORTS)
 endif()
 
 # Tests
@@ -122,7 +122,7 @@ if(GTEST_LIB)
       set(GTEST_ADD_LIBS pthread dl)
     endif(MSVC)
     target_link_libraries(${__execname}
-        decord ${GTEST_LIB} ${GTEST_ADD_LIBS})
+        peli ${GTEST_LIB} ${GTEST_ADD_LIBS})
     set_target_properties(${__execname} PROPERTIES EXCLUDE_FROM_ALL 1)
     set_target_properties(${__execname} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
   endforeach()
@@ -131,5 +131,10 @@ if(GTEST_LIB)
   message(STATUS "Build with: " ${NUM_TESTS}  " tests")
 endif()
 
-# Installation rules
-install(TARGETS decord DESTINATION lib${LIB_SUFFIX})
+# Installation rules.
+# When scikit-build-core drives the wheel build, the COMPONENT python install
+# places libpeli.{so,dylib,dll} inside the peli package directory so libinfo.py
+# finds it via ffi_dir/.. lookup.
+install(TARGETS peli
+    LIBRARY DESTINATION peli COMPONENT python
+    RUNTIME DESTINATION peli COMPONENT python)

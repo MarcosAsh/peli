@@ -8,14 +8,14 @@
 #include "video_loader.h"
 #include "../runtime/str_util.h"
 
-#include <decord/video_interface.h>
-#include <decord/runtime/registry.h>
+#include <peli/video_interface.h>
+#include <peli/runtime/registry.h>
 
 
 #include <dlpack/dlpack.h>
 #include <dmlc/logging.h>
 
-namespace decord {
+namespace peli {
 
 VideoReaderPtr GetVideoReader(std::string fn, DLContext ctx, int width, int height, int nb_thread,
                               int io_type, std::string fault_tol) {
@@ -25,8 +25,8 @@ VideoReaderPtr GetVideoReader(std::string fn, DLContext ctx, int width, int heig
 }
 
 namespace runtime {
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetVideoReader")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetVideoReader")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     std::string fn = args[0];
     int device_type = args[1];
     int device_id = args[2];
@@ -47,43 +47,43 @@ DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetVideoReader")
     *rv = handle;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderNextFrame")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderNextFrame")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     NDArray arr = static_cast<VideoReaderInterface*>(handle)->NextFrame();
     *rv = arr;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetFrameCount")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetFrameCount")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     int64_t ret = static_cast<VideoReaderInterface*>(handle)->GetFrameCount();
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetCurrentPosition")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetCurrentPosition")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     int64_t ret = static_cast<VideoReaderInterface*>(handle)->GetCurrentPosition();
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetKeyIndices")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetKeyIndices")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     NDArray ret = static_cast<VideoReaderInterface*>(handle)->GetKeyIndices();
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetFramePTS")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetFramePTS")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     NDArray ret = static_cast<VideoReaderInterface*>(handle)->GetFramePTS();
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetBatch")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetBatch")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     NDArray indices = args[1];
     std::vector<int64_t> int_indices;
@@ -92,46 +92,46 @@ DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetBatch")
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderSeek")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderSeek")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     int64_t pos = args[1];
     bool ret = static_cast<VideoReaderInterface*>(handle)->Seek(pos);
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderSeekAccurate")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderSeekAccurate")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     int64_t pos = args[1];
     bool ret = static_cast<VideoReaderInterface*>(handle)->SeekAccurate(pos);
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderSkipFrames")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderSkipFrames")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     int64_t num = args[1];
     static_cast<VideoReaderInterface*>(handle)->SkipFrames(num);
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetAverageFPS")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderGetAverageFPS")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     double fps = static_cast<VideoReaderInterface*>(handle)->GetAverageFPS();
     *rv = fps;
   });
 
-DECORD_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderFree")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_reader._CAPI_VideoReaderFree")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoReaderInterfaceHandle handle = args[0];
     auto p = static_cast<VideoReaderInterface*>(handle);
     if (p) delete p;
   });
 
 // VideoLoader
-DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderGetVideoLoader")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderGetVideoLoader")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     CHECK_EQ(args.size(), 11);
     // for convenience, pass in comma separated filenames
     int idx = 0;
@@ -167,51 +167,51 @@ DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderGetVideoLoader")
     *rv = handle;
   });
 
-DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderReset")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderReset")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoLoaderInterfaceHandle handle = args[0];
     static_cast<VideoLoaderInterface*>(handle)->Reset();
   });
 
-DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderLength")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderLength")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoLoaderInterfaceHandle handle = args[0];
     auto len = static_cast<VideoLoaderInterface*>(handle)->Length();
     *rv = len;
   });
 
-DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderHasNext")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderHasNext")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoLoaderInterfaceHandle handle = args[0];
     bool ret = static_cast<VideoLoaderInterface*>(handle)->HasNext();
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderNext")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderNext")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoLoaderInterfaceHandle handle = args[0];
     static_cast<VideoLoaderInterface*>(handle)->Next();
   });
 
-DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderNextData")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderNextData")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoLoaderInterfaceHandle handle = args[0];
     auto ret = static_cast<VideoLoaderInterface*>(handle)->NextData();
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderNextIndices")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderNextIndices")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoLoaderInterfaceHandle handle = args[0];
     auto ret = static_cast<VideoLoaderInterface*>(handle)->NextIndices();
     *rv = ret;
   });
 
-DECORD_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderFree")
-.set_body([] (DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("video_loader._CAPI_VideoLoaderFree")
+.set_body([] (PELIArgs args, PELIRetValue* rv) {
     VideoLoaderInterfaceHandle handle = args[0];
     auto p = static_cast<VideoLoaderInterface*>(handle);
     if (p) delete p;
   });
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli

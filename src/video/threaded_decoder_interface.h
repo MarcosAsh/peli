@@ -4,16 +4,16 @@
  * \brief Video Decoder Interface
  */
 
-#ifndef DECORD_VIDEO_THREADED_DECODER_INTERFACE_H_
-#define DECORD_VIDEO_THREADED_DECODER_INTERFACE_H_
+#ifndef PELI_VIDEO_THREADED_DECODER_INTERFACE_H_
+#define PELI_VIDEO_THREADED_DECODER_INTERFACE_H_
 
 #include "ffmpeg/ffmpeg_common.h"
 #include <vector>
-#include <decord/runtime/ndarray.h>
+#include <peli/runtime/ndarray.h>
 
-namespace decord {
+namespace peli {
 typedef enum {
-    DECORD_SKIP_FRAME   = 0x01,   /**< Set when the frame is not wanted, we can skip image processing  */
+    PELI_SKIP_FRAME   = 0x01,   /**< Set when the frame is not wanted, we can skip image processing  */
 } ThreadedDecoderFlags;
 
 class ThreadedDecoderInterface {
@@ -29,5 +29,5 @@ class ThreadedDecoderInterface {
         virtual ~ThreadedDecoderInterface() = default;
 };  // class ThreadedDecoderInterface
 
-}  // namespace decord
-#endif  // DECORD_VIDEO_THREADED_DECODER_INTERFACE_H_
+}  // namespace peli
+#endif  // PELI_VIDEO_THREADED_DECODER_INTERFACE_H_

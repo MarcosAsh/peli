@@ -6,9 +6,9 @@ import argparse
 import warnings
 import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../python'))
-import decord as de
+import peli as de
 
-parser = argparse.ArgumentParser("Decord benchmark")
+parser = argparse.ArgumentParser("Peli benchmark")
 parser.add_argument('--gpu', type=int, default=-1, help='context to run, use --gpu=-1 to use cpu only')
 parser.add_argument('--file', type=str, default='/tmp/testsrc_h264_100s_default.mp4', help='Test video')
 parser.add_argument('--seed', type=int, default=666, help='numpy random seed for random access indices')

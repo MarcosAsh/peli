@@ -4,12 +4,12 @@
  * \brief CUDA stream
  */
 
-#ifndef DECORD_VIDEO_NVCODEC_CUDA_STREAM_H_
-#define DECORD_VIDEO_NVCODEC_CUDA_STREAM_H_
+#ifndef PELI_VIDEO_NVCODEC_CUDA_STREAM_H_
+#define PELI_VIDEO_NVCODEC_CUDA_STREAM_H_
 
 #include "../../runtime/cuda/cuda_common.h"
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
 class CUStream {
@@ -28,5 +28,5 @@ class CUStream {
 };  // class CUStream
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli
 #endif

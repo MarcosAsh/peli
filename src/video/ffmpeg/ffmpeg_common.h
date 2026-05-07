@@ -4,13 +4,13 @@
  * \brief FFmpeg commons
  */
 
-#ifndef DECORD_VIDEO_FFMPEG_COMMON_H_
-#define DECORD_VIDEO_FFMPEG_COMMON_H_
+#ifndef PELI_VIDEO_FFMPEG_COMMON_H_
+#define PELI_VIDEO_FFMPEG_COMMON_H_
 
 #include "../storage_pool.h"
-#include <decord/base.h>
-#include <decord/runtime/ndarray.h>
-#include <decord/runtime/device_api.h>
+#include <peli/base.h>
+#include <peli/runtime/ndarray.h>
+#include <peli/runtime/device_api.h>
 
 #include <memory>
 #include <queue>
@@ -21,6 +21,7 @@
 extern "C" {
 #endif
 #include <libavcodec/avcodec.h>
+#include <libavcodec/bsf.h>
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavfilter/avfilter.h>
@@ -34,7 +35,7 @@ extern "C" {
 #include <libavutil/display.h>
 #include <libavutil/file.h>
 #include <libswresample/swresample.h>
-#ifdef DECORD_USE_LIBAVDEVICE
+#ifdef PELI_USE_LIBAVDEVICE
 #include <libavdevice/avdevice.h>
 #endif
 #ifdef __cplusplus
@@ -45,7 +46,7 @@ extern "C" {
 #include <dmlc/thread_local.h>
 #include <dlpack/dlpack.h>
 
-namespace decord {
+namespace peli {
 namespace ffmpeg {
 using NDArray = runtime::NDArray;
 
@@ -310,5 +311,5 @@ class AVIOBytesContext {
 };
 
 }  // namespace ffmpeg
-}  // namespace decord
-#endif  // DECORD_VIDEO_FFMPEG_COMMON_H_
+}  // namespace peli
+#endif  // PELI_VIDEO_FFMPEG_COMMON_H_

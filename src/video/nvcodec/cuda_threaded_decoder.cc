@@ -13,7 +13,7 @@
 #include <chrono>
 
 
-namespace decord {
+namespace peli {
 namespace cuda {
 using namespace runtime;
 
@@ -369,4 +369,4 @@ void CUThreadedDecoder::RecordInternalError(std::string message) {
 }
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli

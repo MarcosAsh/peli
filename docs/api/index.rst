@@ -1,9 +1,9 @@
 Python API Reference
 ====================
 
-.. currentmodule:: decord
+.. currentmodule:: peli
 
-.. automodule:: decord
+.. automodule:: peli
 
 .. autosummary::
 
@@ -15,11 +15,11 @@ Python API Reference
 API Reference
 -------------
 
-.. automodule:: decord.video_reader
+.. automodule:: peli.video_reader
     :members:
 
-.. automodule:: decord.video_loader
+.. automodule:: peli.video_loader
     :members:
 
-.. automodule:: decord.ndarray
+.. automodule:: peli.ndarray
     :members:

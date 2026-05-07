@@ -4,12 +4,12 @@
  * \brief Fully random sampler, with random file order and access position
  */
 
-#ifndef DECORD_SAMPLER_RANDOM_SAMPLER_H_
-#define DECORD_SAMPLER_RANDOM_SAMPLER_H_
+#ifndef PELI_SAMPLER_RANDOM_SAMPLER_H_
+#define PELI_SAMPLER_RANDOM_SAMPLER_H_
 
 #include "sampler_interface.h"
 
-namespace decord {
+namespace peli {
 namespace sampler {
 
 class RandomSampler : public SamplerInterface {
@@ -30,6 +30,6 @@ class RandomSampler : public SamplerInterface {
 };  // class RandomSampler
 
 }  // sampler
-}  // decord
+}  // peli
 
-#endif  // DECORD_SAMPLER_RANDOM_SAMPLER_H_
+#endif  // PELI_SAMPLER_RANDOM_SAMPLER_H_

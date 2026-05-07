@@ -22,16 +22,16 @@
  * \file cuda_common.h
  * \brief Common utilities for CUDA
  */
-#ifndef DECORD_RUNTIME_CUDA_CUDA_COMMON_H_
-#define DECORD_RUNTIME_CUDA_CUDA_COMMON_H_
+#ifndef PELI_RUNTIME_CUDA_CUDA_COMMON_H_
+#define PELI_RUNTIME_CUDA_CUDA_COMMON_H_
 
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <decord/runtime/packed_func.h>
+#include <peli/runtime/packed_func.h>
 #include <string>
 #include "../workspace_pool.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 #ifdef __cuda_cuda_h__
@@ -95,5 +95,5 @@ class CUDAThreadEntry {
   static CUDAThreadEntry* ThreadLocal();
 };
 }  // namespace runtime
-}  // namespace decord
-#endif  // DECORD_RUNTIME_CUDA_CUDA_COMMON_H_
+}  // namespace peli
+#endif  // PELI_RUNTIME_CUDA_CUDA_COMMON_H_

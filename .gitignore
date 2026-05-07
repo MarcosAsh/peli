@@ -43,3 +43,14 @@ __pycache__
 python/build/
 python/*egg-info/
 python/dist/
+
+# Local Modal/dev tooling — never committed
+tools/modal/
+.modal/
+
+# IDE / clangd cache
+.cache/
+compile_commands.json
+
+# wheel build artifacts (scikit-build-core writes to build/, also dist/)
+dist/

@@ -12,7 +12,7 @@
 #include <sstream>
 #include <algorithm>
 
-namespace decord {
+namespace peli {
 
 VideoLoader::VideoLoader(std::vector<std::string> filenames, std::vector<DLContext> ctxs,
                          std::vector<int> shape, int interval,
@@ -215,4 +215,4 @@ int64_t VideoLoader::Length() const {
     // return visit_order_.size();
 }
 
-}  // namespace decord
+}  // namespace peli

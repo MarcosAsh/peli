@@ -4,13 +4,13 @@
  * \brief NVCUVID based decoder implementation class
  */
 
-#ifndef DECORD_VIDEO_NVCODEC_CUDA_DECODER_IMPL_H_
-#define DECORD_VIDEO_NVCODEC_CUDA_DECODER_IMPL_H_
+#ifndef PELI_VIDEO_NVCODEC_CUDA_DECODER_IMPL_H_
+#define PELI_VIDEO_NVCODEC_CUDA_DECODER_IMPL_H_
 
 #include "nvcuvid/nvcuvid.h"
 #include <stdint.h>
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
 class CUVideoDecoderImpl {
@@ -41,5 +41,5 @@ class CUVideoDecoderImpl {
 };  // class CUVideoDecoderImpl
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli
 #endif

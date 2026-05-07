@@ -1,0 +1,21 @@
+peli
+Copyright 2026 peli contributors
+
+This product includes software originally developed at the
+DMLC project as part of decord (https://github.com/dmlc/decord),
+licensed under the Apache License, Version 2.0.
+
+decord
+Copyright (c) 2019 by Contributors
+
+The original decord codebase is licensed under the Apache License,
+Version 2.0; you may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+This product also bundles the following third-party software:
+
+  - dlpack (https://github.com/dmlc/dlpack)        Apache-2.0
+  - dmlc-core (https://github.com/dmlc/dmlc-core)  Apache-2.0
+
+See LICENSE for the full Apache License, Version 2.0 text.

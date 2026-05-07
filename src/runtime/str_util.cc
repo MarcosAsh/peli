@@ -7,7 +7,7 @@
 #include "str_util.h"
 #include "file_util.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 std::vector<std::string> SplitString(std::string const &in, char sep) {
@@ -47,4 +47,4 @@ int ParseIntOrFloat(const std::string& str, int64_t& ivalue, double& fvalue) {
 }
 
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli

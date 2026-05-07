@@ -5,7 +5,7 @@
  */
 #include "workspace_pool.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 // page size.
@@ -23,12 +23,12 @@ class WorkspacePool::Pool {
     allocated_.push_back(e);
   }
   // allocate from pool
-  void* Alloc(DECORDContext ctx, DeviceAPI* device, size_t nbytes) {
+  void* Alloc(PELIContext ctx, DeviceAPI* device, size_t nbytes) {
     // Allocate align to page.
     nbytes = (nbytes + (kWorkspacePageSize - 1)) / kWorkspacePageSize * kWorkspacePageSize;
     if (nbytes == 0) nbytes = kWorkspacePageSize;
     Entry e;
-    DECORDType type;
+    PELIType type;
     type.code = kDLUInt;
     type.bits = 8;
     type.lanes = 1;
@@ -92,7 +92,7 @@ class WorkspacePool::Pool {
     }
   }
   // Release all resources
-  void Release(DECORDContext ctx, DeviceAPI* device) {
+  void Release(PELIContext ctx, DeviceAPI* device) {
     CHECK_EQ(allocated_.size(), 1);
     for (size_t i = 1; i < free_list_.size(); ++i) {
       device->FreeDataSpace(ctx, free_list_[i].data);
@@ -119,7 +119,7 @@ WorkspacePool::WorkspacePool(DLDeviceType device_type, std::shared_ptr<DeviceAPI
 WorkspacePool::~WorkspacePool() {
   for (size_t i = 0; i < array_.size(); ++i) {
     if (array_[i] != nullptr) {
-      DECORDContext ctx;
+      PELIContext ctx;
       ctx.device_type = device_type_;
       ctx.device_id = static_cast<int>(i);
       array_[i]->Release(ctx, device_.get());
@@ -128,7 +128,7 @@ WorkspacePool::~WorkspacePool() {
   }
 }
 
-void* WorkspacePool::AllocWorkspace(DECORDContext ctx, size_t size) {
+void* WorkspacePool::AllocWorkspace(PELIContext ctx, size_t size) {
   if (static_cast<size_t>(ctx.device_id) >= array_.size()) {
     array_.resize(ctx.device_id + 1, nullptr);
   }
@@ -138,11 +138,11 @@ void* WorkspacePool::AllocWorkspace(DECORDContext ctx, size_t size) {
   return array_[ctx.device_id]->Alloc(ctx, device_.get(), size);
 }
 
-void WorkspacePool::FreeWorkspace(DECORDContext ctx, void* ptr) {
+void WorkspacePool::FreeWorkspace(PELIContext ctx, void* ptr) {
   CHECK(static_cast<size_t>(ctx.device_id) < array_.size() &&
         array_[ctx.device_id] != nullptr);
   array_[ctx.device_id]->Free(ptr);
 }
 
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli

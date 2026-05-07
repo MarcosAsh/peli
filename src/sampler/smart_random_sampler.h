@@ -4,12 +4,12 @@
  * \brief Smart random sampler for faster video random access
  */
 
-#ifndef DECORD_SAMPLER_SMART_RANDOM_SAMPLER_H_
-#define DECORD_SAMPLER_SMART_RANDOM_SAMPLER_H_
+#ifndef PELI_SAMPLER_SMART_RANDOM_SAMPLER_H_
+#define PELI_SAMPLER_SMART_RANDOM_SAMPLER_H_
 
 #include "sampler_interface.h"
 
-namespace decord {
+namespace peli {
 namespace sampler {
 
 class SmartRandomSampler : public SamplerInterface {
@@ -21,6 +21,6 @@ class SmartRandomSampler : public SamplerInterface {
 };  // class SmartRandomSampler
 
 }  // sampler
-}  // decord
+}  // peli
 
-#endif  // DECORD_SAMPLER_SMART_RANDOM_SAMPLER_H_
+#endif  // PELI_SAMPLER_SMART_RANDOM_SAMPLER_H_

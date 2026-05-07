@@ -8,7 +8,7 @@
 
 #include <dmlc/logging.h>
 
-namespace decord {
+namespace peli {
 namespace ffmpeg {
 
 FFMPEGFilterGraph::FFMPEGFilterGraph(std::string filters_descr, AVCodecContext *dec_ctx)
@@ -65,12 +65,10 @@ void FFMPEGFilterGraph::Init(std::string filters_descr, AVCodecContext *dec_ctx)
     /* buffer video sink: to terminate the filter chain. */
 	// buffersink_params = av_buffersink_params_alloc();
 	// buffersink_params->pixel_fmts = pix_fmts;
-	CHECK_GE(avfilter_graph_create_filter(&buffersink_ctx_, buffersink, "out",
-		NULL, NULL, filter_graph_.get()), 0) << "Cannot create buffer sink";
-	// av_free(buffersink_params);
-    // LOG(INFO) << "create filter sink";
-    // CHECK_GE(av_opt_set_bin(buffersink_ctx_, "pix_fmts", (uint8_t *)&pix_fmts, sizeof(AV_PIX_FMT_RGB24), AV_OPT_SEARCH_CHILDREN), 0) << "Set bin error";
-    CHECK_GE(av_opt_set_int_list(buffersink_ctx_, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN), 0) << "Set output pixel format error.";
+	buffersink_ctx_ = avfilter_graph_alloc_filter(filter_graph_.get(), buffersink, "out");
+	CHECK(buffersink_ctx_) << "Cannot allocate buffer sink";
+	CHECK_GE(av_opt_set_int_list(buffersink_ctx_, "pix_fmts", pix_fmts, AV_PIX_FMT_NONE, AV_OPT_SEARCH_CHILDREN), 0) << "Set output pixel format error.";
+	CHECK_GE(avfilter_init_str(buffersink_ctx_, NULL), 0) << "Cannot init buffer sink";
 
     // LOG(INFO) << "create filter set opt";
     /* Endpoints for the filter graph. */
@@ -114,4 +112,4 @@ bool FFMPEGFilterGraph::Pop(AVFrame **frame) {
 }
 
 }  // namespace ffmpeg
-}  // namespace decord
+}  // namespace peli

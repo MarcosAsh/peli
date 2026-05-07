@@ -4,19 +4,19 @@
  */
 #include <dmlc/json.h>
 #include <dmlc/logging.h>
-#include <decord/runtime/serializer.h>
+#include <peli/runtime/serializer.h>
 #include <fstream>
 #include <vector>
 
 #include "file_util.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 void FunctionInfo::Save(dmlc::JSONWriter* writer) const {
   std::vector<std::string> sarg_types(arg_types.size());
   for (size_t i = 0; i < arg_types.size(); ++i) {
-    sarg_types[i] = DECORDType2String(arg_types[i]);
+    sarg_types[i] = PELIType2String(arg_types[i]);
   }
   writer->BeginObject();
   writer->WriteObjectKeyValue("name", name);
@@ -34,7 +34,7 @@ void FunctionInfo::Load(dmlc::JSONReader* reader) {
   helper.ReadAllFields(reader);
   arg_types.resize(sarg_types.size());
   for (size_t i = 0; i < arg_types.size(); ++i) {
-    arg_types[i] = String2DECORDType(sarg_types[i]);
+    arg_types[i] = String2PELIType(sarg_types[i]);
   }
 }
 
@@ -69,12 +69,12 @@ std::string GetFileFormat(const std::string& file_name,
 
 std::string GetCacheDir() {
   char* env_cache_dir;
-  if ((env_cache_dir = getenv("DECORD_CACHE_DIR"))) return env_cache_dir;
+  if ((env_cache_dir = getenv("PELI_CACHE_DIR"))) return env_cache_dir;
   if ((env_cache_dir = getenv("XDG_CACHE_HOME"))) {
-    return std::string(env_cache_dir) + "/decord";
+    return std::string(env_cache_dir) + "/peli";
   }
   if ((env_cache_dir = getenv("HOME"))) {
-    return std::string(env_cache_dir) + "/.cache/decord";
+    return std::string(env_cache_dir) + "/.cache/peli";
   }
   return ".";
 }
@@ -88,9 +88,9 @@ std::string GetFileBasename(const std::string& file_name) {
 std::string GetMetaFilePath(const std::string& file_name) {
   size_t pos  = file_name.find_last_of(".");
   if (pos != std::string::npos) {
-    return file_name.substr(0, pos) + ".decord_meta.json";
+    return file_name.substr(0, pos) + ".peli_meta.json";
   } else {
-    return file_name + ".decord_meta.json";
+    return file_name + ".peli_meta.json";
   }
 }
 
@@ -122,7 +122,7 @@ void SaveMetaDataToFile(
   CHECK(!fs.fail()) << "Cannot open file " << file_name;
   dmlc::JSONWriter writer(&fs);
   writer.BeginObject();
-  writer.WriteObjectKeyValue("decord_version", version);
+  writer.WriteObjectKeyValue("peli_version", version);
   writer.WriteObjectKeyValue("func_info", fmap);
   writer.EndObject();
   fs.close();
@@ -136,7 +136,7 @@ void LoadMetaDataFromFile(
   std::string version;
   dmlc::JSONReader reader(&fs);
   dmlc::JSONObjectReadHelper helper;
-  helper.DeclareField("decord_version", &version);
+  helper.DeclareField("peli_version", &version);
   helper.DeclareField("func_info", fmap);
   helper.ReadAllFields(&reader);
   fs.close();
@@ -147,4 +147,4 @@ void RemoveFile(const std::string& file_name) {
 }
 
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli

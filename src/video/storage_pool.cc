@@ -6,7 +6,7 @@
 
 #include "storage_pool.h"
 
-namespace decord {
+namespace peli {
 
 NDArrayPool::NDArrayPool() : init_(false) {
 
@@ -44,7 +44,7 @@ void NDArrayPool::Deleter(NDArray::Container* ptr) {
     if (ptr->manager_ctx != nullptr) {
         auto pool = static_cast<NDArrayPool*>(ptr->manager_ctx);
         if (pool->size_ <= pool->queue_.size()) {
-            decord::runtime::DeviceAPI::Get(ptr->dl_tensor.ctx)->FreeDataSpace(
+            peli::runtime::DeviceAPI::Get(ptr->dl_tensor.ctx)->FreeDataSpace(
           ptr->dl_tensor.ctx, ptr->dl_tensor.data);
             delete ptr;
             ptr = nullptr;
@@ -52,11 +52,11 @@ void NDArrayPool::Deleter(NDArray::Container* ptr) {
             static_cast<NDArrayPool*>(ptr->manager_ctx)->queue_.push(NDArray(ptr));
         }
     } else if (ptr->dl_tensor.data != nullptr) {
-        decord::runtime::DeviceAPI::Get(ptr->dl_tensor.ctx)->FreeDataSpace(
+        peli::runtime::DeviceAPI::Get(ptr->dl_tensor.ctx)->FreeDataSpace(
           ptr->dl_tensor.ctx, ptr->dl_tensor.data);
         delete ptr;
         ptr = nullptr;
     }
 }
 
-}  // namespace decord
+}  // namespace peli

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# this file is actually for building decord for macos >=10.9 on github action
+# this file is actually for building peli for macos >=10.9 on github action
 
 set -e
 
@@ -56,7 +56,7 @@ make install
 # built libs
 ls ~/ffmpeg_build/lib
 
-# decord
+# peli
 popd
 pwd
 mkdir -p build && cd build

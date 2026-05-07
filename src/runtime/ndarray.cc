@@ -4,15 +4,15 @@
  * \brief NDArray container infratructure.
  */
 #include <dmlc/logging.h>
-#include <decord/runtime/ndarray.h>
-#include <decord/runtime/c_runtime_api.h>
-#include <decord/runtime/device_api.h>
+#include <peli/runtime/ndarray.h>
+#include <peli/runtime/c_runtime_api.h>
+#include <peli/runtime/device_api.h>
 #include "runtime_base.h"
 
 // deleter for arrays used by DLPack exporter
 extern "C" void NDArrayDLPackDeleter(DLManagedTensor* tensor);
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 inline void VerifyDataType(DLDataType dtype) {
@@ -36,18 +36,18 @@ inline size_t GetDataAlignment(const DLTensor& arr) {
 struct NDArray::Internal {
   // Default deleter for the container
   static void DefaultDeleter(NDArray::Container* ptr) {
-    using decord::runtime::NDArray;
+    using peli::runtime::NDArray;
     if (ptr->manager_ctx != nullptr) {
       static_cast<NDArray::Container*>(ptr->manager_ctx)->DecRef();
     } else if (ptr->dl_tensor.data != nullptr) {
-      decord::runtime::DeviceAPI::Get(ptr->dl_tensor.ctx)->FreeDataSpace(
+      peli::runtime::DeviceAPI::Get(ptr->dl_tensor.ctx)->FreeDataSpace(
           ptr->dl_tensor.ctx, ptr->dl_tensor.data);
     }
     delete ptr;
   }
   // Deleter for NDArray converted from DLPack
   // This is used from data which is passed from external DLPack(DLManagedTensor)
-  // that are not allocated inside of DECORD.
+  // that are not allocated inside of PELI.
   // This enables us to create NDArray from memory allocated by other
   // frameworks that are DLPack compatible
   static void DLPackDeleter(NDArray::Container* ptr) {
@@ -165,11 +165,11 @@ NDArray NDArray::FromDLPack(DLManagedTensor* tensor) {
 
 void NDArray::CopyFromTo(DLTensor* from,
                          DLTensor* to,
-                         DECORDStreamHandle stream) {
+                         PELIStreamHandle stream) {
   size_t from_size = GetDataSize(*from);
   size_t to_size = GetDataSize(*to);
   CHECK_EQ(from_size, to_size)
-    << "DECORDArrayCopyFromTo: The size must exactly match";
+    << "PELIArrayCopyFromTo: The size must exactly match";
 
   CHECK(from->ctx.device_type == to->ctx.device_type
         || from->ctx.device_type == kDLCPU
@@ -178,7 +178,7 @@ void NDArray::CopyFromTo(DLTensor* from,
 
   // Use the context that is *not* a cpu context to get the correct device
   // api manager.
-  DECORDContext ctx = from->ctx.device_type != kDLCPU ? from->ctx : to->ctx;
+  PELIContext ctx = from->ctx.device_type != kDLCPU ? from->ctx : to->ctx;
 
   DeviceAPI::Get(ctx)->CopyDataFromTo(
     from->data, static_cast<size_t>(from->byte_offset),
@@ -187,23 +187,23 @@ void NDArray::CopyFromTo(DLTensor* from,
 }
 
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli
 
-using namespace decord::runtime;
+using namespace peli::runtime;
 
 void NDArrayDLPackDeleter(DLManagedTensor* tensor) {
   static_cast<NDArray::Container*>(tensor->manager_ctx)->DecRef();
   delete tensor;
 }
 
-int DECORDArrayAlloc(const decord_index_t* shape,
+int PELIArrayAlloc(const peli_index_t* shape,
                   int ndim,
                   int dtype_code,
                   int dtype_bits,
                   int dtype_lanes,
                   int device_type,
                   int device_id,
-                  DECORDArrayHandle* out) {
+                  PELIArrayHandle* out) {
   API_BEGIN();
   DLDataType dtype;
   dtype.code = static_cast<uint8_t>(dtype_code);
@@ -217,48 +217,48 @@ int DECORDArrayAlloc(const decord_index_t* shape,
   API_END();
 }
 
-int DECORDArrayFree(DECORDArrayHandle handle) {
+int PELIArrayFree(PELIArrayHandle handle) {
   API_BEGIN();
   reinterpret_cast<NDArray::Container*>(handle)->DecRef();
   API_END();
 }
 
-int DECORDArrayCopyFromTo(DECORDArrayHandle from,
-                       DECORDArrayHandle to,
-                       DECORDStreamHandle stream) {
+int PELIArrayCopyFromTo(PELIArrayHandle from,
+                       PELIArrayHandle to,
+                       PELIStreamHandle stream) {
   API_BEGIN();
   NDArray::CopyFromTo(from, to, stream);
   API_END();
 }
 
-int DECORDArrayFromDLPack(DLManagedTensor* from,
-                       DECORDArrayHandle* out) {
+int PELIArrayFromDLPack(DLManagedTensor* from,
+                       PELIArrayHandle* out) {
   API_BEGIN();
   *out = NDArray::Internal::MoveAsDLTensor(NDArray::FromDLPack(from));
   API_END();
 }
 
-int DECORDArrayToDLPack(DECORDArrayHandle from,
+int PELIArrayToDLPack(PELIArrayHandle from,
                      DLManagedTensor** out) {
   API_BEGIN();
   *out = NDArray::Internal::ToDLPack(reinterpret_cast<NDArray::Container*>(from));
   API_END();
 }
 
-void DECORDDLManagedTensorCallDeleter(DLManagedTensor* dltensor) {
+void PELIDLManagedTensorCallDeleter(DLManagedTensor* dltensor) {
   (*(dltensor->deleter))(dltensor);
 }
 
-int DECORDArrayCopyFromBytes(DECORDArrayHandle handle,
+int PELIArrayCopyFromBytes(PELIArrayHandle handle,
                           void* data,
                           size_t nbytes) {
   API_BEGIN();
-  DECORDContext cpu_ctx;
+  PELIContext cpu_ctx;
   cpu_ctx.device_type = kDLCPU;
   cpu_ctx.device_id = 0;
   size_t arr_size = GetDataSize(*handle);
   CHECK_EQ(arr_size, nbytes)
-      << "DECORDArrayCopyFromBytes: size mismatch";
+      << "PELIArrayCopyFromBytes: size mismatch";
   DeviceAPI::Get(handle->ctx)->CopyDataFromTo(
       data, 0,
       handle->data, static_cast<size_t>(handle->byte_offset),
@@ -266,16 +266,16 @@ int DECORDArrayCopyFromBytes(DECORDArrayHandle handle,
   API_END();
 }
 
-int DECORDArrayCopyToBytes(DECORDArrayHandle handle,
+int PELIArrayCopyToBytes(PELIArrayHandle handle,
                         void* data,
                         size_t nbytes) {
   API_BEGIN();
-  DECORDContext cpu_ctx;
+  PELIContext cpu_ctx;
   cpu_ctx.device_type = kDLCPU;
   cpu_ctx.device_id = 0;
   size_t arr_size = GetDataSize(*handle);
   CHECK_EQ(arr_size, nbytes)
-      << "DECORDArrayCopyToBytes: size mismatch";
+      << "PELIArrayCopyToBytes: size mismatch";
   DeviceAPI::Get(handle->ctx)->CopyDataFromTo(
       handle->data, static_cast<size_t>(handle->byte_offset),
       data, 0,

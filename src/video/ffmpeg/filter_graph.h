@@ -4,8 +4,8 @@
  * \brief FFmpeg Filter Graph Definition
  */
 
-#ifndef DECORD_VIDEO_FFMPEG_FILTER_GRAPH_H_
-#define DECORD_VIDEO_FFMPEG_FILTER_GRAPH_H_
+#ifndef PELI_VIDEO_FFMPEG_FILTER_GRAPH_H_
+#define PELI_VIDEO_FFMPEG_FILTER_GRAPH_H_
 
 #include "ffmpeg_common.h"
 
@@ -14,7 +14,7 @@
 
 #include <dmlc/base.h>
 
-namespace decord {
+namespace peli {
 namespace ffmpeg {
 
 /**
@@ -82,5 +82,5 @@ class FFMPEGFilterGraph {
 };  // FFMPEGFilterGraph
 
 }  // namespace ffmpeg
-}  // namespace decord
-#endif  // DECORD_VIDEO_FFMPEG_FILTER_GRAPH_H_
+}  // namespace peli
+#endif  // PELI_VIDEO_FFMPEG_FILTER_GRAPH_H_

@@ -4,8 +4,8 @@
  * \brief NVCUVID based parser
  */
 
-#ifndef DECORD_VIDEO_NVCODEC_CU_PARSER_H_
-#define DECORD_VIDEO_NVCODEC_CU_PARSER_H_
+#ifndef PELI_VIDEO_NVCODEC_CU_PARSER_H_
+#define PELI_VIDEO_NVCODEC_CU_PARSER_H_
 
 #include <cstring>
 
@@ -20,7 +20,7 @@ extern "C" {
 }
 #endif
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
 class CUVideoParser {
@@ -89,7 +89,7 @@ class CUVideoParser {
     bool initialized_;
 };
 
-}  // namespace decord
+}  // namespace peli
 }  // namespace cuda
 
 #endif

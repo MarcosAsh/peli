@@ -1,18 +1,18 @@
 /*!
  *  Copyright (c) 2019 by Contributors if not otherwise specified
  * \file module.cc
- * \brief DECORD module system
+ * \brief PELI module system
  */
-#include <decord/runtime/module.h>
-#include <decord/runtime/registry.h>
-#include <decord/runtime/packed_func.h>
+#include <peli/runtime/module.h>
+#include <peli/runtime/registry.h>
+#include <peli/runtime/packed_func.h>
 #include <unordered_set>
 #include <cstring>
 #ifndef _LIBCPP_SGX_CONFIG
 #include "file_util.h"
 #endif
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 void Module::Import(Module other) {
@@ -134,42 +134,42 @@ bool RuntimeEnabled(const std::string& target) {
   return runtime::Registry::Get(f_name) != nullptr;
 }
 
-DECORD_REGISTER_GLOBAL("module._Enabled")
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
+PELI_REGISTER_GLOBAL("module._Enabled")
+.set_body([](PELIArgs args, PELIRetValue *ret) {
     *ret = RuntimeEnabled(args[0]);
     });
 
-DECORD_REGISTER_GLOBAL("module._GetSource")
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
+PELI_REGISTER_GLOBAL("module._GetSource")
+.set_body([](PELIArgs args, PELIRetValue *ret) {
     *ret = args[0].operator Module()->GetSource(args[1]);
     });
 
-DECORD_REGISTER_GLOBAL("module._ImportsSize")
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
+PELI_REGISTER_GLOBAL("module._ImportsSize")
+.set_body([](PELIArgs args, PELIRetValue *ret) {
     *ret = static_cast<int64_t>(
         args[0].operator Module()->imports().size());
     });
 
-DECORD_REGISTER_GLOBAL("module._GetImport")
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
+PELI_REGISTER_GLOBAL("module._GetImport")
+.set_body([](PELIArgs args, PELIRetValue *ret) {
     *ret = args[0].operator Module()->
         imports().at(args[1].operator int());
     });
 
-DECORD_REGISTER_GLOBAL("module._GetTypeKey")
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
+PELI_REGISTER_GLOBAL("module._GetTypeKey")
+.set_body([](PELIArgs args, PELIRetValue *ret) {
     *ret = std::string(args[0].operator Module()->type_key());
     });
 
-DECORD_REGISTER_GLOBAL("module._LoadFromFile")
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
+PELI_REGISTER_GLOBAL("module._LoadFromFile")
+.set_body([](PELIArgs args, PELIRetValue *ret) {
     *ret = Module::LoadFromFile(args[0], args[1]);
     });
 
-DECORD_REGISTER_GLOBAL("module._SaveToFile")
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
+PELI_REGISTER_GLOBAL("module._SaveToFile")
+.set_body([](PELIArgs args, PELIRetValue *ret) {
     args[0].operator Module()->
         SaveToFile(args[1], args[2]);
     });
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli

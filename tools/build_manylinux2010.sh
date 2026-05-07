@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# this file is actually for building decord for manylinux2010 on github action
+# this file is actually for building peli for manylinux2010 on github action
 
 set -e
 
@@ -83,7 +83,7 @@ make install
 # build libs
 ls ~/ffmpeg_build/lib
 
-# decord
+# peli
 popd
 pwd
 ls ..
@@ -91,5 +91,5 @@ mkdir -p ../build
 pushd ../build
 /usr/local/bin/cmake .. -DUSE_CUDA=0 -DFFMPEG_DIR=~/ffmpeg_build
 make -j$(nproc)
-cp libdecord.so /usr/local/lib/
+cp libpeli.so /usr/local/lib/
 popd

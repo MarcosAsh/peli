@@ -8,7 +8,7 @@
 
 #include <dmlc/logging.h>
 
-namespace decord {
+namespace peli {
 namespace sampler {
 
 SequentialSampler::SequentialSampler(std::vector<int64_t> lens, std::vector<int64_t> range, int bs, int interval, int skip)
@@ -64,4 +64,4 @@ size_t SequentialSampler::Size() const {
     return visit_order_.size();
 }
 }  // sampler
-}  // decord
+}  // peli

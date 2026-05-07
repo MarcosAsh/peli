@@ -4,22 +4,22 @@
  * \brief Image processing functions
  */
 
-#ifndef DECORD_IMPROC_IMPROC_H_
-#define DECORD_IMPROC_IMPROC_H_
+#ifndef PELI_IMPROC_IMPROC_H_
+#define PELI_IMPROC_IMPROC_H_
 
 #include <stdint.h>
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
-#ifdef DECORD_USE_CUDA
+#ifdef PELI_USE_CUDA
 
 void ProcessFrame(cudaTextureObject_t chroma, cudaTextureObject_t luma,
                   uint8_t* dst, cudaStream_t stream, uint16_t input_width, uint16_t input_height,
                   int output_width, int output_height);
 #endif
 }  // namespace imp
-}  // namespace decord
+}  // namespace peli
 
 
-#endif  // DECORD_IMPROC_IMPROC_H_
+#endif  // PELI_IMPROC_IMPROC_H_

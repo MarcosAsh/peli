@@ -1,10 +1,10 @@
 """
-This is the global script that set the version information of DECORD.
+This is the global script that set the version information of PELI.
 This script runs and update all the locations that related to versions
 List of affected files:
-- decord-root/python/decord/_ffi/libinfo.py
-- decord-root/include/decord/runtime/c_runtime_api.h
-- decord-root/src/runtime/file_util.cc
+- peli-root/python/peli/_ffi/libinfo.py
+- peli-root/include/peli/runtime/c_runtime_api.h
+- peli-root/src/runtime/file_util.cc
 """
 import os
 import re
@@ -44,11 +44,11 @@ def main():
     curr_dir = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
     proj_root = os.path.abspath(os.path.join(curr_dir, ".."))
     # python path
-    update(os.path.join(proj_root, "python", "decord", "_ffi", "libinfo.py"),
+    update(os.path.join(proj_root, "python", "peli", "_ffi", "libinfo.py"),
            r"(?<=__version__ = \")[.0-9a-z]+", __version__)
     # C++ header
-    update(os.path.join(proj_root, "include", "decord", "runtime", "c_runtime_api.h"),
-           "(?<=DECORD_VERSION \")[.0-9a-z]+", __version__)
+    update(os.path.join(proj_root, "include", "peli", "runtime", "c_runtime_api.h"),
+           "(?<=PELI_VERSION \")[.0-9a-z]+", __version__)
     # file util
     update(os.path.join(proj_root, "src", "runtime", "file_util.cc"),
            "(?<=std::string version = \")[.0-9a-z]+", __version__)

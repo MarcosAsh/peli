@@ -7,14 +7,14 @@
 #include "video_reader.h"
 #include "ffmpeg/threaded_decoder.h"
 #include "../runtime/str_util.h"
-#if DECORD_USE_CUDA
+#if PELI_USE_CUDA
 #include "nvcodec/cuda_threaded_decoder.h"
 #endif
 #include <algorithm>
-#include <decord/runtime/ndarray.h>
-#include <decord/runtime/c_runtime_api.h>
+#include <peli/runtime/ndarray.h>
+#include <peli/runtime/c_runtime_api.h>
 
-namespace decord {
+namespace peli {
 
 using NDArray = runtime::NDArray;
 using AVFramePtr = ffmpeg::AVFramePtr;
@@ -23,13 +23,13 @@ using FFMPEGThreadedDecoder = ffmpeg::FFMPEGThreadedDecoder;
 using AVFramePool = ffmpeg::AVFramePool;
 using AVPacketPool = ffmpeg::AVPacketPool;
 // AVIO buffer size when reading from raw bytes
-static const int AVIO_BUFFER_SIZE = std::stoi(runtime::GetEnvironmentVariableOrDefault("DECORD_AVIO_BUFFER_SIZE", "40960"));
+static const int AVIO_BUFFER_SIZE = std::stoi(runtime::GetEnvironmentVariableOrDefault("PELI_AVIO_BUFFER_SIZE", "40960"));
 // (corrupted video only): Max retry when cache frame is unavailable and rewind is required to decode a frame
-static const int REWIND_RETRY_MAX = std::stoi(runtime::GetEnvironmentVariableOrDefault("DECORD_REWIND_RETRY_MAX", "16"));
+static const int REWIND_RETRY_MAX = std::stoi(runtime::GetEnvironmentVariableOrDefault("PELI_REWIND_RETRY_MAX", "16"));
 // (corrupted video only): Max retry when eof is detected but last few frames are not available
-static const int EOF_RETRY_MAX = std::stoi(runtime::GetEnvironmentVariableOrDefault("DECORD_EOF_RETRY_MAX", "10240"));
+static const int EOF_RETRY_MAX = std::stoi(runtime::GetEnvironmentVariableOrDefault("PELI_EOF_RETRY_MAX", "10240"));
 // (corrupted video only): The warning threshold(0.0 - 1.0) when multiple frames are unavailable and fallbacked to cached frames
-static const float DUPLICATE_WARNING_THRESHOLD = std::stof(runtime::GetEnvironmentVariableOrDefault("DECORD_DUPLICATE_WARNING_THRESHOLD", "0.25"));
+static const float DUPLICATE_WARNING_THRESHOLD = std::stof(runtime::GetEnvironmentVariableOrDefault("PELI_DUPLICATE_WARNING_THRESHOLD", "0.25"));
 
 VideoReader::VideoReader(std::string fn, DLContext ctx, int width, int height, int nb_thread, int io_type, std::string fault_tol)
      : ctx_(ctx), key_indices_(), pts_frame_map_(), tmp_key_frame_(), overrun_(false), frame_ts_(), codecs_(),
@@ -46,7 +46,7 @@ VideoReader::VideoReader(std::string fn, DLContext ctx, int width, int height, i
     if (io_type == kDevice) {
         LOG(WARNING) << "Not implemented";
         return;
-        // #ifdef DECORD_USE_LIBAVDEVICE
+        // #ifdef PELI_USE_LIBAVDEVICE
         //     avdevice_register_all();
         //     fmt_ctx = avformat_alloc_context();
         //     CHECK(fmt_ctx) << "Unable to alloc avformat context";
@@ -55,7 +55,7 @@ VideoReader::VideoReader(std::string fn, DLContext ctx, int width, int height, i
         //     std::string device_name = "video=" + fn;
         //     open_ret = avformat_open_input(&fmt_ctx, device_name.c_str(), ifmt, NULL);
         // #else
-        //     LOG(WARNING) << "Unable to process device IO as decord is not built with libavdevice!";
+        //     LOG(WARNING) << "Unable to process device IO as peli is not built with libavdevice!";
         //     return;
         // #endif
     } else if (io_type == kRawBytes) {
@@ -145,7 +145,7 @@ VideoReader::~VideoReader(){
 
 void VideoReader::SetVideoStream(int stream_nb) {
     if (!fmt_ctx_) return;
-    AVCodec *dec;
+    const AVCodec *dec;
     int st_nb = av_find_best_stream(fmt_ctx_.get(), AVMEDIA_TYPE_VIDEO, stream_nb, -1, &dec, 0);
     // LOG(INFO) << "find best stream: " << st_nb;
     CHECK_GE(st_nb, 0) << "ERROR cannot find video stream with wanted index: " << stream_nb;
@@ -159,7 +159,7 @@ void VideoReader::SetVideoStream(int stream_nb) {
     if (kDLCPU == ctx_.device_type) {
         decoder_ = std::unique_ptr<ThreadedDecoderInterface>(new FFMPEGThreadedDecoder());
     } else if (kDLGPU == ctx_.device_type) {
-#ifdef DECORD_USE_CUDA
+#ifdef PELI_USE_CUDA
         // note: cuda threaded decoder will modify codecpar
         decoder_ = std::unique_ptr<ThreadedDecoderInterface>(new cuda::CUThreadedDecoder(
             ctx_.device_id, codecpar.get(), fmt_ctx_->iformat));
@@ -428,7 +428,7 @@ NDArray VideoReader::NextFrameImpl() {
               } else {
                 if (rewind_offset > REWIND_RETRY_MAX) {
                   LOG(FATAL) << "[" << filename_ << "]Unable to handle EOF because the video might have corrupted frames" 
-                  << "and `DECORD_REWIND_RETRY_MAX=" << REWIND_RETRY_MAX << "`. You may override the limit by `export DECORD_REWIND_RETRY_MAX=32`"
+                  << "and `PELI_REWIND_RETRY_MAX=" << REWIND_RETRY_MAX << "`. You may override the limit by `export PELI_REWIND_RETRY_MAX=32`"
                   << " for example to allow more auto-substituded frames, exit...";
                 }
                 SeekAccurate(curr_frame_ - rewind_offset);
@@ -442,7 +442,7 @@ NDArray VideoReader::NextFrameImpl() {
                   break;
                 } else {
                   LOG(FATAL) << "[" << filename_ << "]Unable to handle EOF because it takes too long to retrieve last few frames and "
-                  << "`DECORD_EOF_RETRY_MAX=" << EOF_RETRY_MAX << "`. You may override the limit by `export DECORD_EOF_RETRY_MAX=20480`"
+                  << "`PELI_EOF_RETRY_MAX=" << EOF_RETRY_MAX << "`. You may override the limit by `export PELI_EOF_RETRY_MAX=20480`"
                   << " for example to allow more EOF retry attempts, exit...";
                 }
               }
@@ -554,7 +554,11 @@ double VideoReader::GetRotation() const {
     if (rotate && *rotate->value && strcmp(rotate->value, "0"))
         theta = atof(rotate->value);
 
-    uint8_t* displaymatrix = av_stream_get_side_data(active_st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
+    const AVPacketSideData *sd = av_packet_side_data_get(
+        active_st->codecpar->coded_side_data,
+        active_st->codecpar->nb_coded_side_data,
+        AV_PKT_DATA_DISPLAYMATRIX);
+    uint8_t* displaymatrix = sd ? sd->data : nullptr;
     if (displaymatrix && !theta)
         theta = -av_display_rotation_get((int32_t*) displaymatrix);
 
@@ -736,7 +740,7 @@ bool VideoReader::FetchCachedFrame(NDArray &frame, int64_t pos) {
       if (!fault_warn_emit_) {
           LOG(WARNING) << "[" << filename_ << "]You have received more than " << failed_idx_.size()
             << " frames corrupted and recovered from nearest frames."
-            << " Set environment variable `DECORD_DUPLICATE_WARNING_THRESHOLD=1.0`"
+            << " Set environment variable `PELI_DUPLICATE_WARNING_THRESHOLD=1.0`"
             << "if you want to disable this warning.";
           fault_warn_emit_ = true;
       }
@@ -744,4 +748,4 @@ bool VideoReader::FetchCachedFrame(NDArray &frame, int64_t pos) {
   return true;
 }
 
-}  // namespace decord
+}  // namespace peli

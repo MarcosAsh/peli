@@ -9,7 +9,7 @@
 
 #include "../../runtime/cuda/cuda_common.h"
 
-namespace decord {
+namespace peli {
 namespace cuda {
 using namespace runtime;
 
@@ -116,4 +116,4 @@ const CUImageTexture& CUTextureRegistry::GetTexture(uint8_t* ptr, unsigned int i
 }
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli

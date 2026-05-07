@@ -3,9 +3,9 @@
  * \file dso_dll_module.cc
  * \brief Module to load from dynamic shared library.
  */
-#include <decord/runtime/module.h>
-#include <decord/runtime/registry.h>
-#include <decord/runtime/packed_func.h>
+#include <peli/runtime/module.h>
+#include <peli/runtime/registry.h>
+#include <peli/runtime/packed_func.h>
 #include "module_util.h"
 
 #if defined(_WIN32)
@@ -14,11 +14,11 @@
 #include <dlfcn.h>
 #endif
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 // Module to load from dynamic shared libary.
-// This is the default module DECORD used for host-side AOT
+// This is the default module PELI used for host-side AOT
 class DSOModuleNode final : public ModuleNode {
  public:
   ~DSOModuleNode() {
@@ -33,11 +33,11 @@ class DSOModuleNode final : public ModuleNode {
       const std::string& name,
       const std::shared_ptr<ModuleNode>& sptr_to_self) final {
     BackendPackedCFunc faddr;
-    if (name == runtime::symbol::decord_module_main) {
+    if (name == runtime::symbol::peli_module_main) {
       const char* entry_name = reinterpret_cast<const char*>(
-          GetSymbol(runtime::symbol::decord_module_main));
+          GetSymbol(runtime::symbol::peli_module_main));
       CHECK(entry_name!= nullptr)
-          << "Symbol " << runtime::symbol::decord_module_main << " is not presented";
+          << "Symbol " << runtime::symbol::peli_module_main << " is not presented";
       faddr = reinterpret_cast<BackendPackedCFunc>(GetSymbol(entry_name));
     } else {
       faddr = reinterpret_cast<BackendPackedCFunc>(GetSymbol(name.c_str()));
@@ -49,7 +49,7 @@ class DSOModuleNode final : public ModuleNode {
   void Init(const std::string& name) {
     Load(name);
     if (auto *ctx_addr =
-        reinterpret_cast<void**>(GetSymbol(runtime::symbol::decord_module_ctx))) {
+        reinterpret_cast<void**>(GetSymbol(runtime::symbol::peli_module_ctx))) {
       *ctx_addr = this;
     }
     InitContextFunctions([this](const char* fname) {
@@ -58,7 +58,7 @@ class DSOModuleNode final : public ModuleNode {
     // Load the imported modules
     const char* dev_mblob =
         reinterpret_cast<const char*>(
-            GetSymbol(runtime::symbol::decord_dev_mblob));
+            GetSymbol(runtime::symbol::peli_dev_mblob));
     if (dev_mblob != nullptr) {
       ImportModuleBlob(dev_mblob, &imports_);
     }
@@ -103,11 +103,11 @@ class DSOModuleNode final : public ModuleNode {
 #endif
 };
 
-DECORD_REGISTER_GLOBAL("module.loadfile_so")
-.set_body([](DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("module.loadfile_so")
+.set_body([](PELIArgs args, PELIRetValue* rv) {
     std::shared_ptr<DSOModuleNode> n = std::make_shared<DSOModuleNode>();
     n->Init(args[0]);
     *rv = runtime::Module(n);
   });
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli

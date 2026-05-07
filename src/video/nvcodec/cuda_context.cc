@@ -7,7 +7,7 @@
 #include "cuda_context.h"
 #include "../../runtime/cuda/cuda_common.h"
 
-namespace decord {
+namespace peli {
 namespace cuda {
 using namespace runtime;
 
@@ -82,4 +82,4 @@ CUContext::operator CUcontext() const {
 }
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli

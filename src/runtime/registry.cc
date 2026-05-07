@@ -5,14 +5,14 @@
  */
 #include <dmlc/logging.h>
 #include <dmlc/thread_local.h>
-#include <decord/runtime/registry.h>
+#include <peli/runtime/registry.h>
 #include <unordered_map>
 #include <mutex>
 #include <memory>
 #include <array>
 #include "runtime_base.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 struct Registry::Manager {
@@ -110,10 +110,10 @@ ExtTypeVTable* ExtTypeVTable::RegisterInternal(
   return pvt;
 }
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli
 
 /*! \brief entry to to easily hold returning information */
-struct DECORDFuncThreadLocalEntry {
+struct PELIFuncThreadLocalEntry {
   /*! \brief result holder for returning strings */
   std::vector<std::string> ret_vec_str;
   /*! \brief result holder for returning string pointers */
@@ -121,39 +121,39 @@ struct DECORDFuncThreadLocalEntry {
 };
 
 /*! \brief Thread local store that can be used to hold return values. */
-typedef dmlc::ThreadLocalStore<DECORDFuncThreadLocalEntry> DECORDFuncThreadLocalStore;
+typedef dmlc::ThreadLocalStore<PELIFuncThreadLocalEntry> PELIFuncThreadLocalStore;
 
-int DECORDExtTypeFree(void* handle, int type_code) {
+int PELIExtTypeFree(void* handle, int type_code) {
   API_BEGIN();
-  decord::runtime::ExtTypeVTable::Get(type_code)->destroy(handle);
+  peli::runtime::ExtTypeVTable::Get(type_code)->destroy(handle);
   API_END();
 }
 
-int DECORDFuncRegisterGlobal(
-    const char* name, DECORDFunctionHandle f, int override) {
+int PELIFuncRegisterGlobal(
+    const char* name, PELIFunctionHandle f, int override) {
   API_BEGIN();
-  decord::runtime::Registry::Register(name, override != 0)
-      .set_body(*static_cast<decord::runtime::PackedFunc*>(f));
+  peli::runtime::Registry::Register(name, override != 0)
+      .set_body(*static_cast<peli::runtime::PackedFunc*>(f));
   API_END();
 }
 
-int DECORDFuncGetGlobal(const char* name, DECORDFunctionHandle* out) {
+int PELIFuncGetGlobal(const char* name, PELIFunctionHandle* out) {
   API_BEGIN();
-  const decord::runtime::PackedFunc* fp =
-      decord::runtime::Registry::Get(name);
+  const peli::runtime::PackedFunc* fp =
+      peli::runtime::Registry::Get(name);
   if (fp != nullptr) {
-    *out = new decord::runtime::PackedFunc(*fp);  // NOLINT(*)
+    *out = new peli::runtime::PackedFunc(*fp);  // NOLINT(*)
   } else {
     *out = nullptr;
   }
   API_END();
 }
 
-int DECORDFuncListGlobalNames(int *out_size,
+int PELIFuncListGlobalNames(int *out_size,
                            const char*** out_array) {
   API_BEGIN();
-  DECORDFuncThreadLocalEntry *ret = DECORDFuncThreadLocalStore::Get();
-  ret->ret_vec_str = decord::runtime::Registry::ListNames();
+  PELIFuncThreadLocalEntry *ret = PELIFuncThreadLocalStore::Get();
+  ret->ret_vec_str = peli::runtime::Registry::ListNames();
   ret->ret_vec_charp.clear();
   for (size_t i = 0; i < ret->ret_vec_str.size(); ++i) {
     ret->ret_vec_charp.push_back(ret->ret_vec_str[i].c_str());

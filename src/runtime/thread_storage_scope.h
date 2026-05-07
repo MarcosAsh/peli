@@ -1,16 +1,16 @@
 /*!
  *  Copyright (c) 2019 by Contributors if not otherwise specified
  * \file thread_storage_scope.h
- * \brief Extract thread axis configuration from DECORDArgs.
+ * \brief Extract thread axis configuration from PELIArgs.
  */
-#ifndef DECORD_RUNTIME_THREAD_STORAGE_SCOPE_H_
-#define DECORD_RUNTIME_THREAD_STORAGE_SCOPE_H_
+#ifndef PELI_RUNTIME_THREAD_STORAGE_SCOPE_H_
+#define PELI_RUNTIME_THREAD_STORAGE_SCOPE_H_
 
-#include <decord/runtime/packed_func.h>
+#include <peli/runtime/packed_func.h>
 #include <string>
 #include <vector>
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 /*!
@@ -170,7 +170,7 @@ class ThreadAxisConfig {
     }
   }
   // extract workload from arguments.
-  ThreadWorkLoad Extract(DECORDArgs x) const {
+  ThreadWorkLoad Extract(PELIArgs x) const {
     ThreadWorkLoad w;
     std::fill(w.work_size, w.work_size + 6, 1);
     for (size_t i = 0; i < arg_index_map_.size(); ++i) {
@@ -194,14 +194,14 @@ class ThreadAxisConfig {
 };
 
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli
 
 namespace std {
 template <>
-struct hash<::decord::runtime::StorageScope> {
-  std::size_t operator()(const ::decord::runtime::StorageScope& k) const {
+struct hash<::peli::runtime::StorageScope> {
+  std::size_t operator()(const ::peli::runtime::StorageScope& k) const {
     return static_cast<size_t>(k.rank);
   }
 };
 }  // namespace std
-#endif  // DECORD_RUNTIME_THREAD_STORAGE_SCOPE_H_
+#endif  // PELI_RUNTIME_THREAD_STORAGE_SCOPE_H_

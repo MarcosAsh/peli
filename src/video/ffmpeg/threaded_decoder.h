@@ -4,12 +4,12 @@
  * \brief FFmpeg threaded decoder definition
  */
 
-#ifndef DECORD_VIDEO_FFMPEG_THREADED_DECODER_H_
-#define DECORD_VIDEO_FFMPEG_THREADED_DECODER_H_
+#ifndef PELI_VIDEO_FFMPEG_THREADED_DECODER_H_
+#define PELI_VIDEO_FFMPEG_THREADED_DECODER_H_
 
 #include "filter_graph.h"
 #include "../threaded_decoder_interface.h"
-#include <decord/runtime/ndarray.h>
+#include <peli/runtime/ndarray.h>
 
 #include <thread>
 #include <unordered_set>
@@ -17,7 +17,7 @@
 
 #include <dmlc/concurrency.h>
 
-namespace decord {
+namespace peli {
 namespace ffmpeg {
 
 class FFMPEGThreadedDecoder final : public ThreadedDecoderInterface {
@@ -71,6 +71,6 @@ class FFMPEGThreadedDecoder final : public ThreadedDecoderInterface {
 };
 
 }  // namespace ffmpeg
-}  // namespace decord
+}  // namespace peli
 
-#endif  // DECORD_VIDEO_FFMPEG_THREADED_DECODER_H_
+#endif  // PELI_VIDEO_FFMPEG_THREADED_DECODER_H_

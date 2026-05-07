@@ -4,12 +4,12 @@
  * \brief Sequential sampler, with fixed reading order
  */
 
-#ifndef DECORD_SAMPLER_SEQUENTIAL_SAMPLER_H_
-#define DECORD_SAMPLER_SEQUENTIAL_SAMPLER_H_
+#ifndef PELI_SAMPLER_SEQUENTIAL_SAMPLER_H_
+#define PELI_SAMPLER_SEQUENTIAL_SAMPLER_H_
 
 #include "sampler_interface.h"
 
-namespace decord {
+namespace peli {
 namespace sampler {
 
 class SequentialSampler : public SamplerInterface {
@@ -30,6 +30,6 @@ class SequentialSampler : public SamplerInterface {
 };  // class SequentialSampler
 
 }  // sampler
-}  // decord
+}  // peli
 
-#endif  // DECORD_SAMPLER_SEQUENTIAL_SAMPLER_H_
+#endif  // PELI_SAMPLER_SEQUENTIAL_SAMPLER_H_

@@ -2,14 +2,14 @@
 // Created by Yin, Weisu on 1/6/21.
 //
 
-#ifndef DECORD_AUDIO_READER_H_
-#define DECORD_AUDIO_READER_H_
+#ifndef PELI_AUDIO_READER_H_
+#define PELI_AUDIO_READER_H_
 
 #include <vector>
 
-#include "../../include/decord/audio_interface.h"
+#include "../../include/peli/audio_interface.h"
 
-namespace decord {
+namespace peli {
 
     class AudioReader: public AudioReaderInterface {
     public:
@@ -56,4 +56,4 @@ namespace decord {
 
 }
 
-#endif //DECORD_AUDIO_INTERFACE_H
+#endif //PELI_AUDIO_INTERFACE_H

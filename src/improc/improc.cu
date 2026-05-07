@@ -8,7 +8,7 @@
 #include <cuda_fp16.h>
 // #include <stdio.h>
 
-namespace decord {
+namespace peli {
 namespace cuda {
 namespace detail {
 
@@ -114,4 +114,4 @@ void ProcessFrame(cudaTextureObject_t chroma, cudaTextureObject_t luma,
             (luma, chroma, dst, input_width, input_height, output_width, output_height, fx, fy);
 }
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli

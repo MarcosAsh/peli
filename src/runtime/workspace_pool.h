@@ -3,13 +3,13 @@
  * \file workspace_pool.h
  * \brief Workspace pool utility.
  */
-#ifndef DECORD_RUNTIME_WORKSPACE_POOL_H_
-#define DECORD_RUNTIME_WORKSPACE_POOL_H_
+#ifndef PELI_RUNTIME_WORKSPACE_POOL_H_
+#define PELI_RUNTIME_WORKSPACE_POOL_H_
 
-#include <decord/runtime/device_api.h>
+#include <peli/runtime/device_api.h>
 #include <vector>
 
-namespace decord {
+namespace peli {
 namespace runtime {
 /*!
  * \brief A workspace pool to manage
@@ -22,7 +22,7 @@ namespace runtime {
  *  - The release order is usually in reverse order of allocate
  *  - Repetitive pattern of same allocations over different runs.
  */
-class DECORD_DLL WorkspacePool {
+class PELI_DLL WorkspacePool {
  public:
   /*!
    * \brief Create pool with specific device type and device.
@@ -37,14 +37,14 @@ class DECORD_DLL WorkspacePool {
    * \param ctx The context of allocation.
    * \param size The size to be allocated.
    */
-  void* AllocWorkspace(DECORDContext ctx, size_t size);
+  void* AllocWorkspace(PELIContext ctx, size_t size);
   /*!
    * \brief Free temporal workspace in backend execution.
    *
    * \param ctx The context of allocation.
    * \param ptr The pointer to be freed.
    */
-  void FreeWorkspace(DECORDContext ctx, void* ptr);
+  void FreeWorkspace(PELIContext ctx, void* ptr);
 
  private:
   class Pool;
@@ -57,5 +57,5 @@ class DECORD_DLL WorkspacePool {
 };
 
 }  // namespace runtime
-}  // namespace decord
-#endif  // DECORD_RUNTIME_WORKSPACE_POOL_H_
+}  // namespace peli
+#endif  // PELI_RUNTIME_WORKSPACE_POOL_H_

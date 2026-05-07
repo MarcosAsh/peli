@@ -4,14 +4,15 @@
  * \brief Sampler interface
  */
 
-#ifndef DECORD_SAMPLER_SAMPLER_INTERFACE_H_
-#define DECORD_SAMPLER_SAMPLER_INTERFACE_H_
+#ifndef PELI_SAMPLER_SAMPLER_INTERFACE_H_
+#define PELI_SAMPLER_SAMPLER_INTERFACE_H_
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 #include <utility>
 
-namespace decord {
+namespace peli {
 namespace sampler {
 
 using SamplerIndex = std::pair<size_t, int64_t>;
@@ -29,5 +30,5 @@ class SamplerInterface {
 using SamplerPtr = std::unique_ptr<SamplerInterface>;
 
 }  // sampler
-}  // decord
+}  // peli
 #endif

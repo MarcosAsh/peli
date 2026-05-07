@@ -1,305 +1,137 @@
-# Decord
+# peli
 
-![CI Build](https://github.com/dmlc/decord/workflows/C/C++%20CI/badge.svg?branch=master)
-![Release Build](https://github.com/dmlc/decord/workflows/Publish%20to%20PYPI/badge.svg?branch=master)
-[![PyPI](https://img.shields.io/pypi/v/decord.svg)](https://pypi.python.org/pypi/decord)
-[![Downloads](http://pepy.tech/badge/decord)](http://pepy.tech/project/decord)
+A video decoder for ML training pipelines. Open a video, index into it, get back frames as NumPy arrays, PyTorch tensors, JAX arrays, or TensorFlow tensors via zero-copy DLPack. Nothing imports your framework unless you ask.
 
-![symbol](docs/symbol.png)
+**Why peli exists:**
+- [decord](https://github.com/dmlc/decord) doesn't build on modern FFmpeg (last release 2022, broken on FFmpeg 5+).
+- [torchcodec](https://github.com/meta-pytorch/torchcodec) is excellent but hard-imports `torch`, so JAX/TF/Keras users are stuck.
+- [PyAV](https://github.com/PyAV-Org/PyAV) is too low-level for indexed random access.
+- [DALI](https://github.com/NVIDIA/DALI) and [PyNvVideoCodec](https://github.com/NVIDIA/PyNvVideoCodec) are NVIDIA-only and GPU-only.
 
-`Decord` is a reverse procedure of `Record`. It provides convenient video slicing methods based on a thin wrapper on top of hardware accelerated video decoders, e.g.
+`peli` is a fork of decord, modernized for FFmpeg 7+/8 and Python 3.10–3.14, rebuilt around DLPack rather than a per-framework bridge system. v0.1 is CPU-first with first-class indexed random access; v0.2 adds NVDEC GPU decode.
 
--   FFMPEG/LibAV(Done)
--   Nvidia Codecs(Done)
--   Intel Codecs
+## Status
 
-`Decord` was designed to handle awkward video shuffling experience in order to provide smooth experiences similar to random image loader for deep learning.
+**v0.1 — building from source on Linux.** macOS, Windows wheels, and `pip install peli` are pending.
 
-`Decord` is also able to decode audio from both video and audio files. One can slice video and audio together to get a synchronized result; hence providing a one-stop solution for both video and audio decoding.
+| Feature                                                             | Status                                  |
+| ------------------------------------------------------------------- | --------------------------------------- |
+| `VideoReader` random access, batch fetch, sequential iter           | working                                 |
+| FFmpeg 7+ / 8 compatibility                                         | working                                 |
+| Python 3.10–3.14                                                    | working                                 |
+| NumPy output                                                        | working                                 |
+| DLPack output (`__dlpack__`) for torch / jax / tf / keras zero-copy | working                                 |
+| `output="numpy"` / `"dlpack"` constructor kwarg                     | working                                 |
+| `output="torch"` / `"jax"` / `"tf"` / `"keras"` constructor kwarg   | working (lazy import; not unit-tested)  |
+| `AudioReader` (FFmpeg 7+ channel-layout migration done, untested)   | v0.2                                    |
+| NVDEC GPU decode (CUDA 12+, returns CUDA tensors via DLPack)        | v0.2                                    |
+| VideoToolbox / AMD GPU decode                                       | v0.3+                                   |
+| Cross-platform wheels (`pip install peli`)                          | v0.1+                                   |
 
-Table of contents
-=================
+## Quickstart
 
-- [Benchmark](#preliminary-benchmark)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Bridge for Deep Learning frameworks](#bridges-for-deep-learning-frameworks)
+```python
+import peli
 
-## Preliminary benchmark
+vr = peli.VideoReader("clip.mp4")
+print(len(vr), vr.get_avg_fps())  # 143 15.998
 
-Decord is good at handling random access patterns, which is rather common during neural network training.
+frame = vr[0].asnumpy()           # uint8 (H, W, 3) RGB
+batch = vr.get_batch([0, 30, 60, 90]).asnumpy()  # (4, H, W, 3)
 
-![Speed up](https://user-images.githubusercontent.com/3307514/71223638-7199f300-2289-11ea-9e16-104038f94a55.png)
-
-## Installation
-
-### Install via pip
-
-Simply use
-
-```bash
-pip install decord
+for f in vr:                      # sequential iteration
+    process(f.asnumpy())
 ```
 
-Supported platforms:
+## Install
 
-- [x] Linux
-- [x] Mac OS >= 10.12, python>=3.5
-- [x] Windows
-
-**Note that only CPU versions are provided with PYPI now. Please build from source to enable GPU acclerator.**
-
-
-### Install from source
-
-#### Linux
-
-Install the system packages for building the shared library, for Debian/Ubuntu users, run:
+Wheels are not published to PyPI yet. Once they are, install will be:
 
 ```bash
-# official PPA comes with ffmpeg 2.8, which lacks tons of features, we use ffmpeg 4.0 here
-sudo add-apt-repository ppa:jonathonf/ffmpeg-4 # for ubuntu20.04 official PPA is already version 4.2, you may skip this step
-sudo apt-get update
-sudo apt-get install -y build-essential python3-dev python3-setuptools make cmake
-sudo apt-get install -y ffmpeg libavcodec-dev libavfilter-dev libavformat-dev libavutil-dev
-# note: make sure you have cmake 3.8 or later, you can install from cmake official website if it's too old
+pip install peli
 ```
 
-Clone the repo recursively(important)
+Until then, build from source.
+
+### System FFmpeg
+
+`peli` links against FFmpeg 7 or 8. Install the dev headers for your platform.
 
 ```bash
-git clone --recursive https://github.com/dmlc/decord
-```
+# Debian/Ubuntu
+sudo apt-get install -y build-essential cmake python3-dev \
+    libavcodec-dev libavformat-dev libavutil-dev libswresample-dev \
+    libavfilter-dev libavdevice-dev
 
-Build the shared library in source root directory:
+# Arch
+sudo pacman -S base-devel cmake ffmpeg
 
-```bash
-cd decord
-mkdir build && cd build
-cmake .. -DUSE_CUDA=0 -DCMAKE_BUILD_TYPE=Release
-make
-```
-
-you can specify `-DUSE_CUDA=ON` or `-DUSE_CUDA=/path/to/cuda` or `-DUSE_CUDA=ON` `-DCMAKE_CUDA_COMPILER=/path/to/cuda/nvcc` to enable NVDEC hardware accelerated decoding:
-
-```bash
-cmake .. -DUSE_CUDA=ON -DCMAKE_BUILD_TYPE=Release
-```
-
-Note that if you encountered the an issue with `libnvcuvid.so` (e.g., see [#102](https://github.com/dmlc/decord/issues/102)), it's probably due to the missing link for
-`libnvcuvid.so`, you can manually find it (`ldconfig -p | grep libnvcuvid`) and link the library to `CUDA_TOOLKIT_ROOT_DIR\lib64` to allow `decord` smoothly detect and link the correct library.
-
-To specify a customized FFMPEG library path, use `-DFFMPEG_DIR=/path/to/ffmpeg".
-
-Install python bindings:
-
-```bash
-cd ../python
-# option 1: add python path to $PYTHONPATH, you will need to install numpy separately
-pwd=$PWD
-echo "PYTHONPATH=$PYTHONPATH:$pwd" >> ~/.bashrc
-source ~/.bashrc
-# option 2: install with setuptools
-python3 setup.py install --user
-```
-
-#### Mac OS
-
-Installation on macOS is similar to Linux. But macOS users need to install building tools like clang, GNU Make, cmake first.
-
-Tools like clang and GNU Make are packaged in _Command Line Tools_ for macOS. To install:
-
-```bash
-xcode-select --install
-```
-
-To install other needed packages like cmake, we recommend first installing Homebrew, which is a popular package manager for macOS. Detailed instructions can be found on its [homepage](https://brew.sh/).
-
-After installation of Homebrew, install cmake and ffmpeg by:
-
-```bash
+# macOS
 brew install cmake ffmpeg
-# note: make sure you have cmake 3.8 or later, you can install from cmake official website if it's too old
 ```
 
-Clone the repo recursively(important)
+### Build and install
 
 ```bash
-git clone --recursive https://github.com/dmlc/decord
+git clone --recursive https://github.com/MarcosAsh/peli.git
+cd peli
+pip install .
 ```
 
-Then go to root directory build shared library:
+That's it. `pip` drives the CMake build via [scikit-build-core](https://github.com/scikit-build/scikit-build-core) and produces a wheel that includes `libpeli.so`. For development:
 
 ```bash
-cd decord
+pip install -e . --no-build-isolation  # editable install
+```
+
+If you want the C++ library on its own (e.g., to use it from another language), build with CMake directly:
+
+```bash
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
-make
+make -j$(nproc)
 ```
 
-Install python bindings:
+## Backend interop
 
-```bash
-cd ../python
-# option 1: add python path to $PYTHONPATH, you will need to install numpy separately
-pwd=$PWD
-echo "PYTHONPATH=$PYTHONPATH:$pwd" >> ~/.bash_profile
-source ~/.bash_profile
-# option 2: install with setuptools
-python3 setup.py install --user
-```
-
-#### Windows
-
-For windows, you will need CMake and Visual Studio for C++ compilation.
-
--   First, install `git`, `cmake`, `ffmpeg` and `python`. You can use [Chocolatey](https://chocolatey.org/) to manage packages similar to Linux/Mac OS.
--   Second, install [`Visual Studio 2017 Community`](https://visualstudio.microsoft.com/), this my take some time.
-
-When dependencies are ready, open command line prompt:
-
-```bash
-cd your-workspace
-git clone --recursive https://github.com/dmlc/decord
-cd decord
-mkdir build
-cd build
-cmake -DCMAKE_CXX_FLAGS="/DDECORD_EXPORTS" -DCMAKE_CONFIGURATION_TYPES="Release" -G "Visual Studio 15 2017 Win64" ..
-# open `decord.sln` and build project
-```
-
-## Usage
-
-Decord provides minimal API set for bootstraping. You can also check out jupyter notebook [examples](examples/).
-
-### VideoReader
-
-VideoReader is used to access frames directly from video files.
+`peli.VideoReader` returns `peli.NDArray` by default. The NDArray exposes `__dlpack__` and `__dlpack_device__`, so any DLPack-aware framework can adopt the buffer with zero copies:
 
 ```python
-from decord import VideoReader
-from decord import cpu, gpu
+import peli, torch, jax, tensorflow as tf, numpy as np
 
-vr = VideoReader('examples/flipping_a_pancake.mkv', ctx=cpu(0))
-# a file like object works as well, for in-memory decoding
-with open('examples/flipping_a_pancake.mkv', 'rb') as f:
-  vr = VideoReader(f, ctx=cpu(0))
-print('video frames:', len(vr))
-# 1. the simplest way is to directly access frames
-for i in range(len(vr)):
-    # the video reader will handle seeking and skipping in the most efficient manner
-    frame = vr[i]
-    print(frame.shape)
+vr = peli.VideoReader("clip.mp4")
+frame = vr[0]                                       # peli.NDArray
 
-# To get multiple frames at once, use get_batch
-# this is the efficient way to obtain a long list of frames
-frames = vr.get_batch([1, 3, 5, 7, 9])
-print(frames.shape)
-# (5, 240, 320, 3)
-# duplicate frame indices will be accepted and handled internally to avoid duplicate decoding
-frames2 = vr.get_batch([1, 2, 3, 2, 3, 4, 3, 4, 5]).asnumpy()
-print(frames2.shape)
-# (9, 240, 320, 3)
-
-# 2. you can do cv2 style reading as well
-# skip 100 frames
-vr.skip_frames(100)
-# seek to start
-vr.seek(0)
-batch = vr.next()
-print('frame shape:', batch.shape)
-print('numpy frames:', batch.asnumpy())
-
+n = np.from_dlpack(frame)                            # NumPy 1.22+
+t = torch.from_dlpack(frame)                         # PyTorch
+j = jax.dlpack.from_dlpack(frame.__dlpack__())       # JAX
+x = tf.experimental.dlpack.from_dlpack(frame.__dlpack__())  # TensorFlow
 ```
 
-### VideoLoader
-
-VideoLoader is designed for training deep learning models with tons of video files.
-It provides smart video shuffle techniques in order to provide high random access performance (We know that seeking in video is super slow and redundant).
-The optimizations are underlying in the C++ code, which are invisible to user.
+For convenience, the constructor takes an `output=` kwarg that wraps the conversion for you. Framework imports are lazy: nothing imports torch unless you ask for it.
 
 ```python
-from decord import VideoLoader
-from decord import cpu, gpu
-
-vl = VideoLoader(['1.mp4', '2.avi', '3.mpeg'], ctx=[cpu(0)], shape=(2, 320, 240, 3), interval=1, skip=5, shuffle=1)
-print('Total batches:', len(vl))
-
-for batch in vl:
-    print(batch[0].shape)
+vr = peli.VideoReader("clip.mp4", output="numpy")  # vr[i] is np.ndarray
+vr = peli.VideoReader("clip.mp4", output="torch")  # vr[i] is torch.Tensor
+vr = peli.VideoReader("clip.mp4", output="jax")    # vr[i] is jax.Array
+vr = peli.VideoReader("clip.mp4", output="tf")     # vr[i] is tf.Tensor
+vr = peli.VideoReader("clip.mp4", output="keras")  # uses active Keras 3 backend
 ```
 
-Shuffling video can be tricky, thus we provide various modes:
+`output="dlpack"` returns the raw PyCapsule, and `output="native"` (or `output=None`) returns `peli.NDArray`. Unlike `decord.bridge.set_bridge(...)`, the choice is per-`VideoReader` instance, so different parts of a pipeline can use different backends without stomping on each other.
 
-```python
-shuffle = -1  # smart shuffle mode, based on video properties, (not implemented yet)
-shuffle = 0  # all sequential, no seeking, following initial filename order
-shuffle = 1  # random filename order, no random access for each video, very efficient
-shuffle = 2  # random order
-shuffle = 3  # random frame access in each video only
-```
+## Why fork decord?
 
-### AudioReader
+Upstream `decord` (last release 2022) does not build against FFmpeg 5+, modern GCC, or Python 3.12+, and is no longer actively maintained. `peli` keeps decord's core architecture (C++ FFmpeg core, ctypes FFI, `VideoReader` API) and modernizes the parts that bit-rotted: header includes, removed FFmpeg APIs, the channel-layout migration, the filter graph init order. Public API differences from decord:
 
-AudioReader is used to access samples directly from both video(if there's an audio track) and audio files.
+- DLPack is the primary output contract; `decord.bridge.set_bridge(...)` is replaced by per-instance `output=` (planned).
+- `decord.bridge` is not exported.
 
-```python
-from decord import AudioReader
-from decord import cpu, gpu
+## License and acknowledgments
 
-# You can specify the desired sample rate and channel layout
-# For channels there are two options: default to the original layout or mono
-ar = AudioReader('example.mp3', ctx=cpu(0), sample_rate=44100, mono=False)
-print('Shape of audio samples: ', ar.shape())
-# To access the audio samples
-print('The first sample: ', ar[0])
-print('The first five samples: ', ar[0:5])
-print('Get a batch of samples: ', ar.get_batch([1,3,5]))
-```
+`peli` is licensed under the Apache License, Version 2.0 (see [LICENSE](LICENSE)). It is derived from [dmlc/decord](https://github.com/dmlc/decord), also Apache-2.0. See [NOTICE](NOTICE) for the full attribution.
 
-### AVReader
+Bundled third-party software:
 
-AVReader is a wraper for both AudioReader and VideoReader. It enables you to slice the video and audio simultaneously.
-
-```python
-from decord import AVReader
-from decord import cpu, gpu
-
-av = AVReader('example.mov', ctx=cpu(0))
-# To access both the video frames and corresponding audio samples
-audio, video = av[0:20]
-# Each element in audio will be a batch of samples corresponding to a frame of video
-print('Frame #: ', len(audio))
-print('Shape of the audio samples of the first frame: ', audio[0].shape)
-print('Shape of the first frame: ', video.asnumpy()[0].shape)
-# Similarly, to get a batch
-audio2, video2 = av.get_batch([1,3,5])
-```
-
-
-
-## Bridges for deep learning frameworks:
-
-It's important to have a bridge from decord to popular deep learning frameworks for training/inference
-
--   Apache MXNet (Done)
--   Pytorch (Done)
--   TensorFlow (Done)
-
-Using bridges for deep learning frameworks are simple, for example, one can set the default tensor output to `mxnet.ndarray`:
-
-```python
-import decord
-vr = decord.VideoReader('examples/flipping_a_pancake.mkv')
-print('native output:', type(vr[0]), vr[0].shape)
-# native output: <class 'decord.ndarray.NDArray'>, (240, 426, 3)
-# you only need to set the output type once
-decord.bridge.set_bridge('mxnet')
-print(type(vr[0], vr[0].shape))
-# <class 'mxnet.ndarray.ndarray.NDArray'> (240, 426, 3)
-# or pytorch and tensorflow(>=2.2.0)
-decord.bridge.set_bridge('torch')
-decord.bridge.set_bridge('tensorflow')
-# or back to decord native format
-decord.bridge.set_bridge('native')
-```
+- [dlpack](https://github.com/dmlc/dlpack) — Apache-2.0
+- [dmlc-core](https://github.com/dmlc/dmlc-core) — Apache-2.0

@@ -6,7 +6,7 @@
 
 #include "cuda_stream.h"
 
-namespace decord {
+namespace peli {
 namespace cuda {
 CUStream::CUStream(int device_id, bool default_stream) : created_{false}, stream_{0} {
     if (!default_stream) {
@@ -50,4 +50,4 @@ CUStream::operator cudaStream_t() {
     return stream_;
 }
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli

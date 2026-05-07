@@ -4,21 +4,21 @@
  * \brief FFmpeg video reader, implements VideoReaderInterface
  */
 
-#ifndef DECORD_VIDEO_VIDEO_READER_H_
-#define DECORD_VIDEO_VIDEO_READER_H_
+#ifndef PELI_VIDEO_VIDEO_READER_H_
+#define PELI_VIDEO_VIDEO_READER_H_
 
 #include "threaded_decoder_interface.h"
 #include "storage_pool.h"
-#include <decord/video_interface.h>
+#include <peli/video_interface.h>
 
 #include <string>
 #include <vector>
 
-#include <decord/base.h>
+#include <peli/base.h>
 #include <dmlc/concurrency.h>
 
 
-namespace decord {
+namespace peli {
 using timestamp_t = float;
 struct AVFrameTime {
     int64_t pts;          // presentation timestamp, unit is stream time_base
@@ -94,5 +94,5 @@ class VideoReader : public VideoReaderInterface {
         int64_t fault_tol_thresh_;  // fault tolerance threshold, raise if recovered frames retrieved exceeds thresh
         bool fault_warn_emit_;  // whether a fault warning has been emitted
 };  // class VideoReader
-}  // namespace decord
-#endif  // DECORD_VIDEO_VIDEO_READER_H_
+}  // namespace peli
+#endif  // PELI_VIDEO_VIDEO_READER_H_

@@ -8,7 +8,7 @@
 
 #include <dmlc/logging.h>
 
-namespace decord {
+namespace peli {
 namespace ffmpeg {
 
 FFMPEGThreadedDecoder::FFMPEGThreadedDecoder() : frame_count_(0), draining_(false), run_(false), error_status_(false), error_message_() {
@@ -302,4 +302,4 @@ void FFMPEGThreadedDecoder::RecordInternalError(std::string message) {
 }
 
 }  // namespace ffmpeg
-}  // namespace decord
+}  // namespace peli

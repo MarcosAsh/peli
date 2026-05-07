@@ -1,12 +1,12 @@
 import os
 import numpy as np
-from decord import AVReader, cpu, gpu
-from decord.base import DECORDError
+from peli import AVReader, cpu, gpu
+from peli.base import PELIError
 
 CTX = cpu(0)
 
 def get_normal_av_reader():
-    return AVReader('/Users/weisy/Developer/yinweisu/decord/tests/cpp/audio/count_down.mov', CTX)
+    return AVReader('/Users/weisy/Developer/yinweisu/peli/tests/cpp/audio/count_down.mov', CTX)
 
 def test_normal_av_reader():
     av = get_normal_av_reader()
@@ -25,7 +25,7 @@ def test_bytes_io():
 
 def test_no_audio_stream():
     from nose.tools import assert_raises
-    assert_raises(DECORDError, AVReader, os.path.join(os.path.dirname(__file__), '..', '..', 'test_data', 'video_0.mov'), CTX)
+    assert_raises(PELIError, AVReader, os.path.join(os.path.dirname(__file__), '..', '..', 'test_data', 'video_0.mov'), CTX)
 
 def test_index():
     av = get_normal_av_reader()

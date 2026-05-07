@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from decord import AudioReader, cpu, gpu
-from decord.base import DECORDError
+from peli import AudioReader, cpu, gpu
+from peli.base import PELIError
 
 CTX = cpu(0)
 
@@ -27,7 +27,7 @@ def test_double_channels_audio_reader():
 
 def test_no_audio_stream():
     from nose.tools import assert_raises
-    assert_raises(DECORDError, AudioReader, os.path.join(os.path.dirname(__file__), '..', '..', 'test_data', 'video_0.mov'), CTX)
+    assert_raises(PELIError, AudioReader, os.path.join(os.path.dirname(__file__), '..', '..', 'test_data', 'video_0.mov'), CTX)
 
 def test_bytes_io():
     fn = os.path.join(os.path.dirname(__file__), '..', '..', 'cpp', 'audio', 'count_down.mov')

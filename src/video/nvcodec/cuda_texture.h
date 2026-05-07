@@ -4,8 +4,8 @@
  * \brief NVCUVID texture objects
  */
 
-#ifndef DECORD_VIDEO_NVCODEC_CUDA_TEXTURE_H_
-#define DECORD_VIDEO_NVCODEC_CUDA_TEXTURE_H_
+#ifndef PELI_VIDEO_NVCODEC_CUDA_TEXTURE_H_
+#define PELI_VIDEO_NVCODEC_CUDA_TEXTURE_H_
 
 #include "nvcuvid/nvcuvid.h"
 #include "../../runtime/cuda/cuda_common.h"
@@ -14,7 +14,7 @@
 
 #include <dmlc/base.h>
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
 /**
@@ -102,6 +102,6 @@ class CUTextureRegistry {
 };  // class CUTextureRegistry
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli
 
 #endif

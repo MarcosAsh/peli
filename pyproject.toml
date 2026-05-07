@@ -1,0 +1,79 @@
+[build-system]
+requires = ["scikit-build-core>=0.10"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "peli"
+version = "0.1.0"
+description = "Backend-agnostic video decoder for ML frameworks (NumPy/PyTorch/JAX/TF/Keras via DLPack). Fork of dmlc/decord."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "peli contributors" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = ["numpy>=1.22"]
+
+[project.urls]
+Homepage = "https://github.com/MarcosAsh/peli"
+Issues   = "https://github.com/MarcosAsh/peli/issues"
+Source   = "https://github.com/MarcosAsh/peli"
+
+[tool.scikit-build]
+minimum-version = "0.10"
+cmake.version = ">=3.18"
+build-dir = "build/{wheel_tag}"
+wheel.packages = ["python/peli"]
+# Strip the dev artifacts; keep only what users need
+install.components = ["python"]
+build.verbose = true
+
+[tool.cibuildwheel]
+build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
+# Skip 32-bit, musllinux, and PyPy for v0.1.
+skip = ["*-manylinux_i686", "*-musllinux_*", "pp*", "*-win32"]
+build-verbosity = 1
+test-command = "python -c \"import peli; vr = peli.VideoReader(r'{project}/examples/count.mov'); assert len(vr) == 143; print('ok', len(vr), 'frames')\""
+
+[tool.cibuildwheel.linux]
+# manylinux_2_28 has FFmpeg available via the AlmaLinux 8 dnf repos (with EPEL/RPMFusion).
+# We install FFmpeg dev headers in before-all, build against them, then auditwheel
+# vendors the resulting .so dependencies into the wheel.
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+before-all = [
+    "dnf install -y epel-release || true",
+    "dnf install -y --enablerepo=powertools ffmpeg-devel || dnf install -y ffmpeg-devel || (curl -L https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm -o rpmfusion.rpm && dnf install -y rpmfusion.rpm && dnf install -y ffmpeg-devel)",
+]
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.macos]
+# Use Homebrew's FFmpeg. delocate (cibuildwheel's macOS repair) vendors the dylibs.
+before-all = ["brew install ffmpeg"]
+environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
+archs = ["x86_64", "arm64"]
+
+[tool.cibuildwheel.windows]
+# vcpkg ships a static FFmpeg build that links cleanly against MSVC.
+# delvewheel vendors the runtime DLLs into the wheel.
+before-all = [
+    "vcpkg install ffmpeg:x64-windows",
+]
+environment = { CMAKE_TOOLCHAIN_FILE = "C:/vcpkg/scripts/buildsystems/vcpkg.cmake" }
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]

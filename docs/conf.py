@@ -19,9 +19,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'decord'
-copyright = '2019, Decord Contributors'
-author = 'Decord Contributors'
+project = 'peli'
+copyright = '2019, Peli Contributors'
+author = 'Peli Contributors'
 
 # The short X.Y version
 version = '0.3.1'
@@ -107,7 +107,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'decorddoc'
+htmlhelp_basename = 'pelidoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -134,8 +134,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'decord.tex', 'decord Documentation',
-     'Decord Contributors', 'manual'),
+    (master_doc, 'peli.tex', 'peli Documentation',
+     'Peli Contributors', 'manual'),
 ]
 
 
@@ -144,7 +144,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'decord', 'decord Documentation',
+    (master_doc, 'peli', 'peli Documentation',
      [author], 1)
 ]
 
@@ -155,8 +155,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'decord', 'decord Documentation',
-     author, 'decord', 'One line description of project.',
+    (master_doc, 'peli', 'peli Documentation',
+     author, 'peli', 'One line description of project.',
      'Miscellaneous'),
 ]
 

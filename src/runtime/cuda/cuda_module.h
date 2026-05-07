@@ -22,17 +22,17 @@
  * \file cuda_module.h
  * \brief Execution handling of CUDA kernels
  */
-#ifndef DECORD_RUNTIME_CUDA_CUDA_MODULE_H_
-#define DECORD_RUNTIME_CUDA_CUDA_MODULE_H_
+#ifndef PELI_RUNTIME_CUDA_CUDA_MODULE_H_
+#define PELI_RUNTIME_CUDA_CUDA_MODULE_H_
 
-#include <decord/runtime/module.h>
+#include <peli/runtime/module.h>
 #include <memory>
 #include <vector>
 #include <string>
 #include <unordered_map>
 #include "../meta_data.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 /*! \brief Maximum number of GPU supported in CUDAModule */
@@ -52,5 +52,5 @@ Module CUDAModuleCreate(
     std::unordered_map<std::string, FunctionInfo> fmap,
     std::string cuda_source);
 }  // namespace runtime
-}  // namespace decord
-#endif  // DECORD_RUNTIME_CUDA_CUDA_MODULE_H_
+}  // namespace peli
+#endif  // PELI_RUNTIME_CUDA_CUDA_MODULE_H_

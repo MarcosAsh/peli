@@ -4,12 +4,12 @@
  * \brief CUDA Context
  */
 
-#ifndef DECORD_VIDEO_NVCODEC_CUDA_CONTEXT_H
-#define DECORD_VIDEO_NVCODEC_CUDA_CONTEXT_H
+#ifndef PELI_VIDEO_NVCODEC_CUDA_CONTEXT_H
+#define PELI_VIDEO_NVCODEC_CUDA_CONTEXT_H
 
 #include <cuda.h>
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
 class CUContext {
@@ -37,6 +37,6 @@ class CUContext {
 };
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli
 
-#endif  // DECORD_VIDEO_NVCODEC_CUDA_CONTEXT_H
+#endif  // PELI_VIDEO_NVCODEC_CUDA_CONTEXT_H

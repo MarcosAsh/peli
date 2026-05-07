@@ -4,12 +4,12 @@
  * \brief Randomly shuffle file order but not internal frame order
  */
 
-#ifndef DECORD_SAMPLER_RANDOM_FILE_ORDER_SAMPLER_H_
-#define DECORD_SAMPLER_RANDOM_FILE_ORDER_SAMPLER_H_
+#ifndef PELI_SAMPLER_RANDOM_FILE_ORDER_SAMPLER_H_
+#define PELI_SAMPLER_RANDOM_FILE_ORDER_SAMPLER_H_
 
 #include "sampler_interface.h"
 
-namespace decord {
+namespace peli {
 namespace sampler {
 
 class RandomFileOrderSampler : public SamplerInterface {
@@ -41,6 +41,6 @@ class RandomFileOrderSampler : public SamplerInterface {
 };  // class RandomFileOrderSampler
 
 }  // sampler
-}  // decord
+}  // peli
 
-#endif  // DECORD_SAMPLER_RANDOM_FILE_ORDER_SAMPLER_H_
+#endif  // PELI_SAMPLER_RANDOM_FILE_ORDER_SAMPLER_H_

@@ -4,17 +4,17 @@
  * \brief FFmpeg video loader, implements VideoLoaderInterface
  */
 
-#ifndef DECORD_VIDEO_VIDEO_LOADER_H_
-#define DECORD_VIDEO_VIDEO_LOADER_H_
+#ifndef PELI_VIDEO_VIDEO_LOADER_H_
+#define PELI_VIDEO_VIDEO_LOADER_H_
 
 #include "video_reader.h"
 #include "../sampler/sampler_interface.h"
 
 #include <vector>
 
-#include <decord/video_interface.h>
+#include <peli/video_interface.h>
 
-namespace decord {
+namespace peli {
 
 enum ShuffleTypes {
     kNoShuffle = 0,
@@ -65,6 +65,6 @@ public:
         std::vector<DLContext> ctxs_;
         NDArrayPool ndarray_pool_;
 };  // class VideoLoader
-}  // namespace decord
+}  // namespace peli
 
-#endif  //  DECORD_VIDEO_VIDEO_LOADER_H_
+#endif  //  PELI_VIDEO_VIDEO_LOADER_H_

@@ -4,12 +4,12 @@
  * \brief Device specific implementations
  */
 #include <dmlc/thread_local.h>
-#include <decord/runtime/c_runtime_api.h>
-#include <decord/runtime/c_backend_api.h>
-#include <decord/runtime/packed_func.h>
-#include <decord/runtime/module.h>
-#include <decord/runtime/registry.h>
-#include <decord/runtime/device_api.h>
+#include <peli/runtime/c_runtime_api.h>
+#include <peli/runtime/c_backend_api.h>
+#include <peli/runtime/packed_func.h>
+#include <peli/runtime/module.h>
+#include <peli/runtime/registry.h>
+#include <peli/runtime/device_api.h>
 #ifdef _LIBCPP_SGX_CONFIG
 #include "sgx/trusted/runtime.h"
 #endif
@@ -19,14 +19,14 @@
 #include <cstdlib>
 #include "runtime_base.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 class DeviceAPIManager {
  public:
   static const int kMaxDeviceAPI = 32;
   // Get API
-  static DeviceAPI* Get(const DECORDContext& ctx) {
+  static DeviceAPI* Get(const PELIContext& ctx) {
     return Get(ctx.device_type);
   }
   static DeviceAPI* Get(int dev_type, bool allow_missing = false) {
@@ -75,81 +75,81 @@ class DeviceAPIManager {
   }
 };
 
-DeviceAPI* DeviceAPI::Get(DECORDContext ctx, bool allow_missing) {
+DeviceAPI* DeviceAPI::Get(PELIContext ctx, bool allow_missing) {
   return DeviceAPIManager::Get(
       static_cast<int>(ctx.device_type), allow_missing);
 }
 
-void* DeviceAPI::AllocWorkspace(DECORDContext ctx,
+void* DeviceAPI::AllocWorkspace(PELIContext ctx,
                                 size_t size,
-                                DECORDType type_hint) {
+                                PELIType type_hint) {
   return AllocDataSpace(ctx, size, kTempAllocaAlignment, type_hint);
 }
 
-void DeviceAPI::FreeWorkspace(DECORDContext ctx, void* ptr) {
+void DeviceAPI::FreeWorkspace(PELIContext ctx, void* ptr) {
   FreeDataSpace(ctx, ptr);
 }
 
-DECORDStreamHandle DeviceAPI::CreateStream(DECORDContext ctx) {
+PELIStreamHandle DeviceAPI::CreateStream(PELIContext ctx) {
   LOG(FATAL) << "Device does not support stream api.";
   return 0;
 }
 
-void DeviceAPI::FreeStream(DECORDContext ctx, DECORDStreamHandle stream) {
+void DeviceAPI::FreeStream(PELIContext ctx, PELIStreamHandle stream) {
   LOG(FATAL) << "Device does not support stream api.";
 }
 
-void DeviceAPI::SyncStreamFromTo(DECORDContext ctx,
-                                 DECORDStreamHandle event_src,
-                                 DECORDStreamHandle event_dst) {
+void DeviceAPI::SyncStreamFromTo(PELIContext ctx,
+                                 PELIStreamHandle event_src,
+                                 PELIStreamHandle event_dst) {
   LOG(FATAL) << "Device does not support stream api.";
 }
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli
 
-using namespace decord::runtime;
+using namespace peli::runtime;
 
-struct DECORDRuntimeEntry {
+struct PELIRuntimeEntry {
   std::string ret_str;
   std::string last_error;
-  DECORDByteArray ret_bytes;
+  PELIByteArray ret_bytes;
 };
 
-typedef dmlc::ThreadLocalStore<DECORDRuntimeEntry> DECORDAPIRuntimeStore;
+typedef dmlc::ThreadLocalStore<PELIRuntimeEntry> PELIAPIRuntimeStore;
 
-const char *DECORDGetLastError() {
-  return DECORDAPIRuntimeStore::Get()->last_error.c_str();
+const char *PELIGetLastError() {
+  return PELIAPIRuntimeStore::Get()->last_error.c_str();
 }
 
-void DECORDAPISetLastError(const char* msg) {
+void PELIAPISetLastError(const char* msg) {
 #ifndef _LIBCPP_SGX_CONFIG
-  DECORDAPIRuntimeStore::Get()->last_error = msg;
+  PELIAPIRuntimeStore::Get()->last_error = msg;
 #else
   sgx::OCallPackedFunc("__sgx_set_last_error__", msg);
 #endif
 }
 
-int DECORDModLoadFromFile(const char* file_name,
+int PELIModLoadFromFile(const char* file_name,
                        const char* format,
-                       DECORDModuleHandle* out) {
+                       PELIModuleHandle* out) {
   API_BEGIN();
   Module m = Module::LoadFromFile(file_name, format);
   *out = new Module(m);
   API_END();
 }
 
-int DECORDModImport(DECORDModuleHandle mod,
-                 DECORDModuleHandle dep) {
+int PELIModImport(PELIModuleHandle mod,
+                 PELIModuleHandle dep) {
   API_BEGIN();
   static_cast<Module*>(mod)->Import(
       *static_cast<Module*>(dep));
   API_END();
 }
 
-int DECORDModGetFunction(DECORDModuleHandle mod,
+int PELIModGetFunction(PELIModuleHandle mod,
                       const char* func_name,
                       int query_imports,
-                      DECORDFunctionHandle *func) {
+                      PELIFunctionHandle *func) {
   API_BEGIN();
   PackedFunc pf = static_cast<Module*>(mod)->GetFunction(
       func_name, query_imports != 0);
@@ -161,31 +161,31 @@ int DECORDModGetFunction(DECORDModuleHandle mod,
   API_END();
 }
 
-int DECORDModFree(DECORDModuleHandle mod) {
+int PELIModFree(PELIModuleHandle mod) {
   API_BEGIN();
   delete static_cast<Module*>(mod);
   API_END();
 }
 
-int DECORDBackendGetFuncFromEnv(void* mod_node,
+int PELIBackendGetFuncFromEnv(void* mod_node,
                              const char* func_name,
-                             DECORDFunctionHandle *func) {
+                             PELIFunctionHandle *func) {
   API_BEGIN();
-  *func = (DECORDFunctionHandle)(
+  *func = (PELIFunctionHandle)(
       static_cast<ModuleNode*>(mod_node)->GetFuncFromEnv(func_name));
   API_END();
 }
 
-void* DECORDBackendAllocWorkspace(int device_type,
+void* PELIBackendAllocWorkspace(int device_type,
                                int device_id,
                                uint64_t size,
                                int dtype_code_hint,
                                int dtype_bits_hint) {
-  DECORDContext ctx;
+  PELIContext ctx;
   ctx.device_type = static_cast<DLDeviceType>(device_type);
   ctx.device_id = device_id;
 
-  DECORDType type_hint;
+  PELIType type_hint;
   type_hint.code = static_cast<decltype(type_hint.code)>(dtype_code_hint);
   type_hint.bits = static_cast<decltype(type_hint.bits)>(dtype_bits_hint);
   type_hint.lanes = 1;
@@ -195,17 +195,17 @@ void* DECORDBackendAllocWorkspace(int device_type,
                                                     type_hint);
 }
 
-int DECORDBackendFreeWorkspace(int device_type,
+int PELIBackendFreeWorkspace(int device_type,
                             int device_id,
                             void* ptr) {
-  DECORDContext ctx;
+  PELIContext ctx;
   ctx.device_type = static_cast<DLDeviceType>(device_type);
   ctx.device_id = device_id;
   DeviceAPIManager::Get(ctx)->FreeWorkspace(ctx, ptr);
   return 0;
 }
 
-int DECORDBackendRunOnce(void** handle,
+int PELIBackendRunOnce(void** handle,
                       int (*f)(void*),
                       void* cdata,
                       int nbytes) {
@@ -216,28 +216,28 @@ int DECORDBackendRunOnce(void** handle,
   return 0;
 }
 
-int DECORDFuncFree(DECORDFunctionHandle func) {
+int PELIFuncFree(PELIFunctionHandle func) {
   API_BEGIN();
   delete static_cast<PackedFunc*>(func);
   API_END();
 }
 
-int DECORDFuncCall(DECORDFunctionHandle func,
-                DECORDValue* args,
+int PELIFuncCall(PELIFunctionHandle func,
+                PELIValue* args,
                 int* arg_type_codes,
                 int num_args,
-                DECORDValue* ret_val,
+                PELIValue* ret_val,
                 int* ret_type_code) {
   API_BEGIN();
-  DECORDRetValue rv;
+  PELIRetValue rv;
   (*static_cast<const PackedFunc*>(func)).CallPacked(
-      DECORDArgs(args, arg_type_codes, num_args), &rv);
+      PELIArgs(args, arg_type_codes, num_args), &rv);
   // handle return string.
   if (rv.type_code() == kStr ||
-     rv.type_code() == kDECORDType ||
+     rv.type_code() == kPELIType ||
       rv.type_code() == kBytes) {
-    DECORDRuntimeEntry* e = DECORDAPIRuntimeStore::Get();
-    if (rv.type_code() != kDECORDType) {
+    PELIRuntimeEntry* e = PELIAPIRuntimeStore::Get();
+    if (rv.type_code() != kPELIType) {
       e->ret_str = *rv.ptr<std::string>();
     } else {
       e->ret_str = rv.operator std::string();
@@ -257,30 +257,30 @@ int DECORDFuncCall(DECORDFunctionHandle func,
   API_END();
 }
 
-int DECORDCFuncSetReturn(DECORDRetValueHandle ret,
-                      DECORDValue* value,
+int PELICFuncSetReturn(PELIRetValueHandle ret,
+                      PELIValue* value,
                       int* type_code,
                       int num_ret) {
   API_BEGIN();
   CHECK_EQ(num_ret, 1);
-  DECORDRetValue* rv = static_cast<DECORDRetValue*>(ret);
-  *rv = DECORDArgValue(value[0], type_code[0]);
+  PELIRetValue* rv = static_cast<PELIRetValue*>(ret);
+  *rv = PELIArgValue(value[0], type_code[0]);
   API_END();
 }
 
-int DECORDFuncCreateFromCFunc(DECORDPackedCFunc func,
+int PELIFuncCreateFromCFunc(PELIPackedCFunc func,
                            void* resource_handle,
-                           DECORDPackedCFuncFinalizer fin,
-                           DECORDFunctionHandle *out) {
+                           PELIPackedCFuncFinalizer fin,
+                           PELIFunctionHandle *out) {
   API_BEGIN();
   if (fin == nullptr) {
     *out = new PackedFunc(
-        [func, resource_handle](DECORDArgs args, DECORDRetValue* rv) {
-          int ret = func((DECORDValue*)args.values, (int*)args.type_codes, // NOLINT(*)
+        [func, resource_handle](PELIArgs args, PELIRetValue* rv) {
+          int ret = func((PELIValue*)args.values, (int*)args.type_codes, // NOLINT(*)
                          args.num_args, rv, resource_handle);
           if (ret != 0) {
-            std::string err = "DECORDCall CFunc Error:\n";
-            err += DECORDGetLastError();
+            std::string err = "PELICall CFunc Error:\n";
+            err += PELIGetLastError();
             throw dmlc::Error(err);
           }
         });
@@ -289,12 +289,12 @@ int DECORDFuncCreateFromCFunc(DECORDPackedCFunc func,
     // so fin will be called when the lambda went out of scope.
     std::shared_ptr<void> rpack(resource_handle, fin);
     *out = new PackedFunc(
-        [func, rpack](DECORDArgs args, DECORDRetValue* rv) {
-          int ret = func((DECORDValue*)args.values, (int*)args.type_codes, // NOLINT(*)
+        [func, rpack](PELIArgs args, PELIRetValue* rv) {
+          int ret = func((PELIValue*)args.values, (int*)args.type_codes, // NOLINT(*)
                          args.num_args, rv, rpack.get());
           if (ret != 0) {
-            std::string err = "DECORDCall CFunc Error:\n";
-            err += DECORDGetLastError();
+            std::string err = "PELICall CFunc Error:\n";
+            err += PELIGetLastError();
             throw dmlc::Error(err);
           }
       });
@@ -302,58 +302,58 @@ int DECORDFuncCreateFromCFunc(DECORDPackedCFunc func,
   API_END();
 }
 
-int DECORDStreamCreate(int device_type, int device_id, DECORDStreamHandle* out) {
+int PELIStreamCreate(int device_type, int device_id, PELIStreamHandle* out) {
   API_BEGIN();
-  DECORDContext ctx;
+  PELIContext ctx;
   ctx.device_type = static_cast<DLDeviceType>(device_type);
   ctx.device_id = device_id;
   *out = DeviceAPIManager::Get(ctx)->CreateStream(ctx);
   API_END();
 }
 
-int DECORDStreamFree(int device_type, int device_id, DECORDStreamHandle stream) {
+int PELIStreamFree(int device_type, int device_id, PELIStreamHandle stream) {
   API_BEGIN();
-  DECORDContext ctx;
+  PELIContext ctx;
   ctx.device_type = static_cast<DLDeviceType>(device_type);
   ctx.device_id = device_id;
   DeviceAPIManager::Get(ctx)->FreeStream(ctx, stream);
   API_END();
 }
 
-int DECORDSetStream(int device_type, int device_id, DECORDStreamHandle stream) {
+int PELISetStream(int device_type, int device_id, PELIStreamHandle stream) {
   API_BEGIN();
-  DECORDContext ctx;
+  PELIContext ctx;
   ctx.device_type = static_cast<DLDeviceType>(device_type);
   ctx.device_id = device_id;
   DeviceAPIManager::Get(ctx)->SetStream(ctx, stream);
   API_END();
 }
 
-int DECORDSynchronize(int device_type, int device_id, DECORDStreamHandle stream) {
+int PELISynchronize(int device_type, int device_id, PELIStreamHandle stream) {
   API_BEGIN();
-  DECORDContext ctx;
+  PELIContext ctx;
   ctx.device_type = static_cast<DLDeviceType>(device_type);
   ctx.device_id = device_id;
   DeviceAPIManager::Get(ctx)->StreamSync(ctx, stream);
   API_END();
 }
 
-int DECORDStreamStreamSynchronize(int device_type,
+int PELIStreamStreamSynchronize(int device_type,
                                int device_id,
-                               DECORDStreamHandle src,
-                               DECORDStreamHandle dst) {
+                               PELIStreamHandle src,
+                               PELIStreamHandle dst) {
   API_BEGIN();
-  DECORDContext ctx;
+  PELIContext ctx;
   ctx.device_type = static_cast<DLDeviceType>(device_type);
   ctx.device_id = device_id;
   DeviceAPIManager::Get(ctx)->SyncStreamFromTo(ctx, src, dst);
   API_END();
 }
 
-int DECORDCbArgToReturn(DECORDValue* value, int code) {
+int PELICbArgToReturn(PELIValue* value, int code) {
   API_BEGIN();
-  decord::runtime::DECORDRetValue rv;
-  rv = decord::runtime::DECORDArgValue(*value, code);
+  peli::runtime::PELIRetValue rv;
+  rv = peli::runtime::PELIArgValue(*value, code);
   int tcode;
   rv.MoveToCHost(value, &tcode);
   CHECK_EQ(tcode, code);
@@ -361,18 +361,18 @@ int DECORDCbArgToReturn(DECORDValue* value, int code) {
 }
 
 // set device api
-DECORD_REGISTER_GLOBAL(decord::runtime::symbol::decord_set_device)
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
-    DECORDContext ctx;
+PELI_REGISTER_GLOBAL(peli::runtime::symbol::peli_set_device)
+.set_body([](PELIArgs args, PELIRetValue *ret) {
+    PELIContext ctx;
     ctx.device_type = static_cast<DLDeviceType>(args[0].operator int());
     ctx.device_id = args[1];
     DeviceAPIManager::Get(ctx)->SetDevice(ctx);
   });
 
 // set device api
-DECORD_REGISTER_GLOBAL("_GetDeviceAttr")
-.set_body([](DECORDArgs args, DECORDRetValue *ret) {
-    DECORDContext ctx;
+PELI_REGISTER_GLOBAL("_GetDeviceAttr")
+.set_body([](PELIArgs args, PELIRetValue *ret) {
+    PELIContext ctx;
     ctx.device_type = static_cast<DLDeviceType>(args[0].operator int());
     ctx.device_id = args[1];
 

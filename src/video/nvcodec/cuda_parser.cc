@@ -7,7 +7,7 @@
 #include "cuda_threaded_decoder.h"
 
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
 void CUVideoParser::InitParams(AVCodecID codec, CUThreadedDecoder* decoder, int decode_surfaces,
@@ -50,4 +50,4 @@ void CUVideoParser::InitParams(AVCodecID codec, CUThreadedDecoder* decoder, int 
 }
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli

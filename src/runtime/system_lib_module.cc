@@ -3,12 +3,12 @@
  * \file system_lib_module.cc
  * \brief SystemLib module.
  */
-#include <decord/runtime/registry.h>
-#include <decord/runtime/c_backend_api.h>
+#include <peli/runtime/registry.h>
+#include <peli/runtime/c_backend_api.h>
 #include <mutex>
 #include "module_util.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 class SystemLibModuleNode : public ModuleNode {
@@ -41,10 +41,10 @@ class SystemLibModuleNode : public ModuleNode {
 
   void RegisterSymbol(const std::string& name, void* ptr) {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (name == symbol::decord_module_ctx) {
+    if (name == symbol::peli_module_ctx) {
       void** ctx_addr = reinterpret_cast<void**>(ptr);
       *ctx_addr = this;
-    } else if (name == symbol::decord_dev_mblob) {
+    } else if (name == symbol::peli_dev_mblob) {
       // Record pointer to content of submodules to be loaded.
       // We defer loading submodules to the first call to GetFunction().
       // The reason is that RegisterSymbol() gets called when initializing the
@@ -79,14 +79,14 @@ class SystemLibModuleNode : public ModuleNode {
   void* module_blob_{nullptr};
 };
 
-DECORD_REGISTER_GLOBAL("module._GetSystemLib")
-.set_body([](DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("module._GetSystemLib")
+.set_body([](PELIArgs args, PELIRetValue* rv) {
     *rv = runtime::Module(SystemLibModuleNode::Global());
   });
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli
 
-int DECORDBackendRegisterSystemLibSymbol(const char* name, void* ptr) {
-  decord::runtime::SystemLibModuleNode::Global()->RegisterSymbol(name, ptr);
+int PELIBackendRegisterSystemLibSymbol(const char* name, void* ptr) {
+  peli::runtime::SystemLibModuleNode::Global()->RegisterSymbol(name, ptr);
   return 0;
 }

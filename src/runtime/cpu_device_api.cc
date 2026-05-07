@@ -4,8 +4,8 @@
  */
 #include <dmlc/logging.h>
 #include <dmlc/thread_local.h>
-#include <decord/runtime/registry.h>
-#include <decord/runtime/device_api.h>
+#include <peli/runtime/registry.h>
+#include <peli/runtime/device_api.h>
 #include <cstdlib>
 #include <cstring>
 #include "workspace_pool.h"
@@ -14,20 +14,20 @@
 #include <android/api-level.h>
 #endif
 
-namespace decord {
+namespace peli {
 namespace runtime {
 class CPUDeviceAPI final : public DeviceAPI {
  public:
-  void SetDevice(DECORDContext ctx) final {}
-  void GetAttr(DECORDContext ctx, DeviceAttrKind kind, DECORDRetValue* rv) final {
+  void SetDevice(PELIContext ctx) final {}
+  void GetAttr(PELIContext ctx, DeviceAttrKind kind, PELIRetValue* rv) final {
     if (kind == kExist) {
       *rv = 1;
     }
   }
-  void* AllocDataSpace(DECORDContext ctx,
+  void* AllocDataSpace(PELIContext ctx,
                        size_t nbytes,
                        size_t alignment,
-                       DECORDType type_hint) final {
+                       PELIType type_hint) final {
     void* ptr;
 #if _MSC_VER
     ptr = _aligned_malloc(nbytes, alignment);
@@ -43,7 +43,7 @@ class CPUDeviceAPI final : public DeviceAPI {
     return ptr;
   }
 
-  void FreeDataSpace(DECORDContext ctx, void* ptr) final {
+  void FreeDataSpace(PELIContext ctx, void* ptr) final {
 #if _MSC_VER
     _aligned_free(ptr);
 #else
@@ -56,20 +56,20 @@ class CPUDeviceAPI final : public DeviceAPI {
                       void* to,
                       size_t to_offset,
                       size_t size,
-                      DECORDContext ctx_from,
-                      DECORDContext ctx_to,
-                      DECORDType type_hint,
-                      DECORDStreamHandle stream) final {
+                      PELIContext ctx_from,
+                      PELIContext ctx_to,
+                      PELIType type_hint,
+                      PELIStreamHandle stream) final {
     memcpy(static_cast<char*>(to) + to_offset,
            static_cast<const char*>(from) + from_offset,
            size);
   }
 
-  void StreamSync(DECORDContext ctx, DECORDStreamHandle stream) final {
+  void StreamSync(PELIContext ctx, PELIStreamHandle stream) final {
   }
 
-  void* AllocWorkspace(DECORDContext ctx, size_t size, DECORDType type_hint) final;
-  void FreeWorkspace(DECORDContext ctx, void* data) final;
+  void* AllocWorkspace(PELIContext ctx, size_t size, PELIType type_hint) final;
+  void FreeWorkspace(PELIContext ctx, void* data) final;
 
   static const std::shared_ptr<CPUDeviceAPI>& Global() {
     static std::shared_ptr<CPUDeviceAPI> inst =
@@ -83,21 +83,21 @@ struct CPUWorkspacePool : public WorkspacePool {
       WorkspacePool(kDLCPU, CPUDeviceAPI::Global()) {}
 };
 
-void* CPUDeviceAPI::AllocWorkspace(DECORDContext ctx,
+void* CPUDeviceAPI::AllocWorkspace(PELIContext ctx,
                                    size_t size,
-                                   DECORDType type_hint) {
+                                   PELIType type_hint) {
   return dmlc::ThreadLocalStore<CPUWorkspacePool>::Get()
       ->AllocWorkspace(ctx, size);
 }
 
-void CPUDeviceAPI::FreeWorkspace(DECORDContext ctx, void* data) {
+void CPUDeviceAPI::FreeWorkspace(PELIContext ctx, void* data) {
   dmlc::ThreadLocalStore<CPUWorkspacePool>::Get()->FreeWorkspace(ctx, data);
 }
 
-DECORD_REGISTER_GLOBAL("device_api.cpu")
-.set_body([](DECORDArgs args, DECORDRetValue* rv) {
+PELI_REGISTER_GLOBAL("device_api.cpu")
+.set_body([](PELIArgs args, PELIRetValue* rv) {
     DeviceAPI* ptr = CPUDeviceAPI::Global().get();
     *rv = static_cast<void*>(ptr);
   });
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli

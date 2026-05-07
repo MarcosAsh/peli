@@ -10,7 +10,7 @@
 
 #include <dmlc/logging.h>
 
-namespace decord {
+namespace peli {
 namespace sampler {
 
 RandomSampler::RandomSampler(std::vector<int64_t> lens, std::vector<int64_t> range, int bs, int interval, int skip)
@@ -68,4 +68,4 @@ size_t RandomSampler::Size() const {
     return visit_order_.size();
 }
 }  // sampler
-}  // decord
+}  // peli

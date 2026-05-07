@@ -4,8 +4,8 @@
  * \brief NVCUVID based decoder
  */
 
-#ifndef DECORD_VIDEO_NVCODEC_CUDA_THREADED_DECODER_H_
-#define DECORD_VIDEO_NVCODEC_CUDA_THREADED_DECODER_H_
+#ifndef PELI_VIDEO_NVCODEC_CUDA_THREADED_DECODER_H_
+#define PELI_VIDEO_NVCODEC_CUDA_THREADED_DECODER_H_
 
 #include "cuda_stream.h"
 #include "cuda_parser.h"
@@ -19,11 +19,11 @@
 #include <thread>
 #include <mutex>
 
-#include <decord/runtime/ndarray.h>
+#include <peli/runtime/ndarray.h>
 #include <dmlc/concurrency.h>
 #include <dlpack/dlpack.h>
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
 class CUThreadedDecoder final : public ThreadedDecoderInterface {
@@ -111,5 +111,5 @@ class CUThreadedDecoder final : public ThreadedDecoderInterface {
     DISALLOW_COPY_AND_ASSIGN(CUThreadedDecoder);
 };
 }  // namespace cuda
-}  // namespace decord
-#endif  // DECORD_VIDEO_NVCODEC_CUDA_THREADED_DECODER_H_
+}  // namespace peli
+#endif  // PELI_VIDEO_NVCODEC_CUDA_THREADED_DECODER_H_

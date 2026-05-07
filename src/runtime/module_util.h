@@ -3,12 +3,12 @@
  * \file module_util.h
  * \brief Helper utilities for module building
  */
-#ifndef DECORD_RUNTIME_MODULE_UTIL_H_
-#define DECORD_RUNTIME_MODULE_UTIL_H_
+#ifndef PELI_RUNTIME_MODULE_UTIL_H_
+#define PELI_RUNTIME_MODULE_UTIL_H_
 
-#include <decord/runtime/module.h>
-#include <decord/runtime/c_runtime_api.h>
-#include <decord/runtime/c_backend_api.h>
+#include <peli/runtime/module.h>
+#include <peli/runtime/c_runtime_api.h>
+#include <peli/runtime/c_backend_api.h>
 #include <vector>
 
 extern "C" {
@@ -18,7 +18,7 @@ typedef int (*BackendPackedCFunc)(void* args,
                                   int num_args);
 }  // extern "C"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 /*!
  * \brief Wrap a BackendPackedCFunc to packed function.
@@ -40,22 +40,22 @@ void ImportModuleBlob(const char* mblob, std::vector<Module>* module_list);
  */
 template<typename FLookup>
 void InitContextFunctions(FLookup flookup) {
-  #define DECORD_INIT_CONTEXT_FUNC(FuncName)                     \
+  #define PELI_INIT_CONTEXT_FUNC(FuncName)                     \
     if (auto *fp = reinterpret_cast<decltype(&FuncName)*>     \
       (flookup("__" #FuncName))) {                            \
       *fp = FuncName;                                         \
     }
   // Initialize the functions
-  DECORD_INIT_CONTEXT_FUNC(DECORDFuncCall);
-  DECORD_INIT_CONTEXT_FUNC(DECORDAPISetLastError);
-  DECORD_INIT_CONTEXT_FUNC(DECORDBackendGetFuncFromEnv);
-  DECORD_INIT_CONTEXT_FUNC(DECORDBackendAllocWorkspace);
-  DECORD_INIT_CONTEXT_FUNC(DECORDBackendFreeWorkspace);
-  DECORD_INIT_CONTEXT_FUNC(DECORDBackendParallelLaunch);
-  DECORD_INIT_CONTEXT_FUNC(DECORDBackendParallelBarrier);
+  PELI_INIT_CONTEXT_FUNC(PELIFuncCall);
+  PELI_INIT_CONTEXT_FUNC(PELIAPISetLastError);
+  PELI_INIT_CONTEXT_FUNC(PELIBackendGetFuncFromEnv);
+  PELI_INIT_CONTEXT_FUNC(PELIBackendAllocWorkspace);
+  PELI_INIT_CONTEXT_FUNC(PELIBackendFreeWorkspace);
+  PELI_INIT_CONTEXT_FUNC(PELIBackendParallelLaunch);
+  PELI_INIT_CONTEXT_FUNC(PELIBackendParallelBarrier);
 
-  #undef DECORD_INIT_CONTEXT_FUNC
+  #undef PELI_INIT_CONTEXT_FUNC
 }
 }  // namespace runtime
-}  // namespace decord
-#endif   // DECORD_RUNTIME_MODULE_UTIL_H_
+}  // namespace peli
+#endif   // PELI_RUNTIME_MODULE_UTIL_H_

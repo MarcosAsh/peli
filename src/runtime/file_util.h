@@ -3,13 +3,13 @@
  * \file file_util.h
  * \brief Minimum file manipulation util for runtime.
  */
-#ifndef DECORD_RUNTIME_FILE_UTIL_H_
-#define DECORD_RUNTIME_FILE_UTIL_H_
+#ifndef PELI_RUNTIME_FILE_UTIL_H_
+#define PELI_RUNTIME_FILE_UTIL_H_
 
 #include <string>
 #include "meta_data.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 /*!
  * \brief Get file format from given file name or format argument.
@@ -20,8 +20,8 @@ std::string GetFileFormat(const std::string& file_name,
                           const std::string& format);
 
 /*!
- * \return the directory in which DECORD stores cached files.
- *         May be set using DECORD_CACHE_DIR; defaults to system locations.
+ * \return the directory in which PELI stores cached files.
+ *         May be set using PELI_CACHE_DIR; defaults to system locations.
  */
 std::string GetCacheDir();
 
@@ -78,5 +78,5 @@ void LoadMetaDataFromFile(
  */
 void RemoveFile(const std::string& file_name);
 }  // namespace runtime
-}  // namespace decord
-#endif  // DECORD_RUNTIME_FILE_UTIL_H_
+}  // namespace peli
+#endif  // PELI_RUNTIME_FILE_UTIL_H_

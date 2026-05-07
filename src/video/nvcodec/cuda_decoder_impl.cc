@@ -8,7 +8,7 @@
 #include "../../runtime/cuda/cuda_common.h"
 #include <ostream>
 
-namespace decord {
+namespace peli {
 namespace cuda {
 using namespace runtime;
 
@@ -198,4 +198,4 @@ uint16_t CUVideoDecoderImpl::Height() const {
 }
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli

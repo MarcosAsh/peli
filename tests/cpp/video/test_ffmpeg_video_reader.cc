@@ -1,5 +1,5 @@
-#include <decord/video_interface.h>
-#include <decord/base.h>
+#include <peli/video_interface.h>
+#include <peli/base.h>
 #include <dmlc/logging.h>
 #include <chrono>
 #include <vector>
@@ -7,8 +7,8 @@
 // #include <dmlc/io.h>
 // #include <gtest/gtest.h>
 
-using NDArray = decord::runtime::NDArray;
-using namespace decord;
+using NDArray = peli::runtime::NDArray;
+using namespace peli;
 
 std::time_t getTimeStamp() {
 	std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
@@ -16,7 +16,7 @@ std::time_t getTimeStamp() {
 }
 
 int main(int argc, const char **argv) {
-    auto vr = decord::GetVideoReader("/tmp/testsrc_h264_10s_default.mp4", kCPU);
+    auto vr = peli::GetVideoReader("/tmp/testsrc_h264_10s_default.mp4", kCPU);
     LOG(INFO) << "Frame count: " << vr->GetFrameCount();
     vr->QueryStreams();
     NDArray array;

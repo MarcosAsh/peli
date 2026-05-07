@@ -1,8 +1,9 @@
 import os
 import random
 import numpy as np
-from decord import VideoReader, cpu, gpu
-from decord.base import DECORDError
+import pytest
+from peli import VideoReader, cpu, gpu
+from peli.base import PELIError
 
 CTX = cpu(0)
 
@@ -55,9 +56,9 @@ def test_video_get_batch():
     frames = vr.get_batch(rand_lst)
 
 def test_video_corrupted_get_batch():
-    from nose.tools import assert_raises
     vr = _get_corrupted_test_video(ctx=cpu(0))
-    assert_raises(DECORDError, vr.get_batch, range(40))
+    with pytest.raises(PELIError):
+        vr.get_batch(range(40))
 
 def test_rotated_video():
     # Input videos are all h=320 w=568 in metadata, but
@@ -104,5 +105,4 @@ def test_bytes_io():
         
 
 if __name__ == '__main__':
-    import nose
-    nose.runmodule()
+    pytest.main([__file__, '-v'])

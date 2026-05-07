@@ -121,7 +121,7 @@ set(FFMPEG_LIBRARIES
 if (FFMPEG_LIBAVDEVICE)
   message(STATUS "Found libavdevice, device input will be enabled")
   set(FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${FFMPEG_LIBAVDEVICE})
-  add_definitions(-DDECORD_USE_LIBAVDEVICE)
+  add_definitions(-DPELI_USE_LIBAVDEVICE)
 else (FFMPEG_LIBAVDEVICE)
   message(STATUS "Unable to find libavdevice, device input API will not work!")
 endif (FFMPEG_LIBAVDEVICE)

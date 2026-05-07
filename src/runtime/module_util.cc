@@ -6,12 +6,12 @@
 #ifndef _LIBCPP_SGX_CONFIG
 #include <dmlc/memory_io.h>
 #endif
-#include <decord/runtime/module.h>
-#include <decord/runtime/registry.h>
+#include <peli/runtime/module.h>
+#include <peli/runtime/registry.h>
 #include <string>
 #include "module_util.h"
 
-namespace decord {
+namespace peli {
 namespace runtime {
 
 void ImportModuleBlob(const char* mblob, std::vector<Module>* mlist) {
@@ -45,14 +45,14 @@ void ImportModuleBlob(const char* mblob, std::vector<Module>* mlist) {
 
 PackedFunc WrapPackedFunc(BackendPackedCFunc faddr,
                           const std::shared_ptr<ModuleNode>& sptr_to_self) {
-  return PackedFunc([faddr, sptr_to_self](DECORDArgs args, DECORDRetValue* rv) {
+  return PackedFunc([faddr, sptr_to_self](PELIArgs args, PELIRetValue* rv) {
       int ret = (*faddr)(
-          const_cast<DECORDValue*>(args.values),
+          const_cast<PELIValue*>(args.values),
           const_cast<int*>(args.type_codes),
           args.num_args);
-      CHECK_EQ(ret, 0) << DECORDGetLastError();
+      CHECK_EQ(ret, 0) << PELIGetLastError();
     });
 }
 
 }  // namespace runtime
-}  // namespace decord
+}  // namespace peli

@@ -5,11 +5,11 @@
 #include "audio_reader.h"
 
 
-#include <decord/audio_interface.h>
-#include <decord/runtime/registry.h>
+#include <peli/audio_interface.h>
+#include <peli/runtime/registry.h>
 
 
-namespace decord {
+namespace peli {
 
     AudioReaderPtr GetAudioReader(std::string fn, int sampleRate, DLContext ctx, int io_type, bool mono) {
         std::shared_ptr<AudioReaderInterface> ptr;
@@ -19,8 +19,8 @@ namespace decord {
 
 
     namespace runtime {
-        DECORD_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetAudioReader")
-        .set_body([](DECORDArgs args, DECORDRetValue* rv) {
+        PELI_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetAudioReader")
+        .set_body([](PELIArgs args, PELIRetValue* rv) {
             std::string fn = args[0];
             int device_type = args[1];
             int device_id = args[2];
@@ -41,49 +41,49 @@ namespace decord {
             *rv = handle;
         });
 
-        DECORD_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetNDArray")
-        .set_body([](DECORDArgs args, DECORDRetValue* rv) {
+        PELI_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetNDArray")
+        .set_body([](PELIArgs args, PELIRetValue* rv) {
             AudioReaderInterfaceHandle handle = args[0];
             NDArray array = static_cast<AudioReaderInterface*>(handle)->GetNDArray();
             *rv = array;
         });
 
-        DECORD_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetNumPaddingSamples")
-        .set_body([](DECORDArgs args, DECORDRetValue* rv) {
+        PELI_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetNumPaddingSamples")
+        .set_body([](PELIArgs args, PELIRetValue* rv) {
             AudioReaderInterfaceHandle handle = args[0];
             int numPaddingSamples = static_cast<AudioReaderInterface*>(handle)->GetNumPaddingSamples();
             *rv = numPaddingSamples;
         });
 
-        DECORD_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetDuration")
-        .set_body([](DECORDArgs args, DECORDRetValue* rv) {
+        PELI_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetDuration")
+        .set_body([](PELIArgs args, PELIRetValue* rv) {
             AudioReaderInterfaceHandle handle = args[0];
             double duration = static_cast<AudioReaderInterface*>(handle)->GetDuration();
             *rv = duration;
         });
 
-        DECORD_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetNumSamplesPerChannel")
-        .set_body([](DECORDArgs args, DECORDRetValue* rv) {
+        PELI_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetNumSamplesPerChannel")
+        .set_body([](PELIArgs args, PELIRetValue* rv) {
             AudioReaderInterfaceHandle handle = args[0];
             int64_t numSamplesPerChannel = static_cast<AudioReaderInterface*>(handle)->GetNumSamplesPerChannel();
             *rv = numSamplesPerChannel;
         });
 
-        DECORD_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetNumChannels")
-        .set_body([](DECORDArgs args, DECORDRetValue* rv) {
+        PELI_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetNumChannels")
+        .set_body([](PELIArgs args, PELIRetValue* rv) {
             AudioReaderInterfaceHandle handle = args[0];
             int numChannels = static_cast<AudioReaderInterface*>(handle)->GetNumChannels();
             *rv = numChannels;
         });
 
-        DECORD_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetInfo")
-        .set_body([](DECORDArgs args, DECORDRetValue* rv) {
+        PELI_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderGetInfo")
+        .set_body([](PELIArgs args, PELIRetValue* rv) {
             AudioReaderInterfaceHandle handle = args[0];
             static_cast<AudioReaderInterface*>(handle)->GetInfo();
         });
 
-        DECORD_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderFree")
-        .set_body([](DECORDArgs args, DECORDRetValue* rv) {
+        PELI_REGISTER_GLOBAL("audio_reader._CAPI_AudioReaderFree")
+        .set_body([](PELIArgs args, PELIRetValue* rv) {
             AudioReaderInterfaceHandle handle = args[0];
             auto p = static_cast<AudioReaderInterface*>(handle);
             if (p) delete p;

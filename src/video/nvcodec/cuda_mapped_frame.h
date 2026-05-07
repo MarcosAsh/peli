@@ -4,14 +4,14 @@
  * \brief NVCUVID mapped frame
  */
 
-#ifndef DECORD_VIDEO_NVCODEC_CUDA_MAPPED_FRAME_H_
-#define DECORD_VIDEO_NVCODEC_CUDA_MAPPED_FRAME_H_
+#ifndef PELI_VIDEO_NVCODEC_CUDA_MAPPED_FRAME_H_
+#define PELI_VIDEO_NVCODEC_CUDA_MAPPED_FRAME_H_
 
 #include "nvcuvid/nvcuvid.h"
 
 #include <dmlc/base.h>
 
-namespace decord {
+namespace peli {
 namespace cuda {
 
 class CUMappedFrame {
@@ -40,6 +40,6 @@ class CUMappedFrame {
 };
 
 }  // namespace cuda
-}  // namespace decord
+}  // namespace peli
 
-#endif  // DECORD_VIDEO_NVCODEC_CUDA_MAPPED_FRAME_H_
+#endif  // PELI_VIDEO_NVCODEC_CUDA_MAPPED_FRAME_H_

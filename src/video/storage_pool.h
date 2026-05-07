@@ -4,19 +4,19 @@
  * \brief Simple storage pool
  */
 
-#ifndef DECORD_VIDEO_STORAGE_POOL_H_
-#define DECORD_VIDEO_STORAGE_POOL_H_
+#ifndef PELI_VIDEO_STORAGE_POOL_H_
+#define PELI_VIDEO_STORAGE_POOL_H_
 
 #include <queue>
 #include <vector>
 
-#include <decord/runtime/ndarray.h>
-#include <decord/runtime/device_api.h>
+#include <peli/runtime/ndarray.h>
+#include <peli/runtime/device_api.h>
 
 #include <dmlc/thread_local.h>
 #include <dlpack/dlpack.h>
 
-namespace decord {
+namespace peli {
 
 /**
  * \brief A pool with auto release memory management
@@ -117,6 +117,6 @@ class NDArrayPool {
         bool init_;
 };  // NDArrayPool
 
-}  // namespace decord
+}  // namespace peli
 
-#endif  // DECORD_VIDEO_STORAGE_POOL_H_
+#endif  // PELI_VIDEO_STORAGE_POOL_H_

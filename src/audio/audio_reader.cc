@@ -7,9 +7,9 @@
 #include <memory>
 #include <cmath>
 
-namespace decord {
+namespace peli {
     // AVIO buffer size when reading from raw bytes
-    static const int AVIO_BUFFER_SIZE = std::stoi(runtime::GetEnvironmentVariableOrDefault("DECORD_AVIO_BUFFER_SIZE", "40960"));
+    static const int AVIO_BUFFER_SIZE = std::stoi(runtime::GetEnvironmentVariableOrDefault("PELI_AVIO_BUFFER_SIZE", "40960"));
 
     AudioReader::AudioReader(std::string fn, int sampleRate, DLContext ctx, int io_type, bool mono)
     : ctx(ctx), io_ctx_(), pFormatContext(nullptr), swr(nullptr), pCodecParameters(nullptr),
@@ -128,7 +128,7 @@ namespace decord {
                 pCodecParameters = tempCodecParameters;
                 originalSampleRate = tempCodecParameters->sample_rate;
                 if (targetSampleRate == -1) targetSampleRate = originalSampleRate;
-                numChannels = tempCodecParameters->channels;
+                numChannels = tempCodecParameters->ch_layout.nb_channels;
                 break;
             }
         }
@@ -148,7 +148,6 @@ namespace decord {
         if (codecOpenRet < 0) {
             char errstr[200];
             av_strerror(codecOpenRet, errstr, 200);
-            avcodec_close(pCodecContext);
             avcodec_free_context(&pCodecContext);
             avformat_close_input(&pFormatContext);
             LOG(FATAL) << "ERROR open codec through avcodec_open2: " << errstr;
@@ -210,7 +209,6 @@ namespace decord {
         // clean up
         av_frame_free(&pFrame);
         av_packet_free(&pPacket);
-        avcodec_close(pCodecContext);
         swr_close(swr);
         swr_free(&swr);
         avcodec_free_context(&pCodecContext);
@@ -229,7 +227,7 @@ namespace decord {
         // allocate resample buffer
         float** outBuffer;
         int outLinesize = 0;
-        int outNumChannels = av_get_channel_layout_nb_channels(mono ? AV_CH_LAYOUT_MONO : pFrame->channel_layout);
+        int outNumChannels = mono ? 1 : pFrame->ch_layout.nb_channels;
         numChannels = outNumChannels;
         int outNumSamples = av_rescale_rnd(pFrame->nb_samples,
                                            this->targetSampleRate, pFrame->sample_rate, AV_ROUND_UP);
@@ -281,11 +279,12 @@ namespace decord {
         if (!this->swr) {
             LOG(FATAL) << "ERROR Failed to allocate resample context";
         }
-        if (pCodecContext->channel_layout == 0) {
-            pCodecContext->channel_layout = av_get_default_channel_layout( pCodecContext->channels );
+        if (pCodecContext->ch_layout.order == AV_CHANNEL_ORDER_UNSPEC) {
+            av_channel_layout_default(&pCodecContext->ch_layout, pCodecContext->ch_layout.nb_channels);
         }
-        av_opt_set_channel_layout(this->swr, "in_channel_layout",  pCodecContext->channel_layout, 0);
-        av_opt_set_channel_layout(this->swr, "out_channel_layout", mono ? AV_CH_LAYOUT_MONO : pCodecContext->channel_layout,  0);
+        AVChannelLayout mono_layout = AV_CHANNEL_LAYOUT_MONO;
+        av_opt_set_chlayout(this->swr, "in_chlayout",  &pCodecContext->ch_layout, 0);
+        av_opt_set_chlayout(this->swr, "out_chlayout", mono ? &mono_layout : &pCodecContext->ch_layout, 0);
         av_opt_set_int(this->swr, "in_sample_rate",     pCodecContext->sample_rate,                0);
         av_opt_set_int(this->swr, "out_sample_rate",    this->targetSampleRate,                0);
         av_opt_set_sample_fmt(this->swr, "in_sample_fmt",  pCodecContext->sample_fmt, 0);

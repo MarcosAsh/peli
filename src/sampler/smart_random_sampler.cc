@@ -6,8 +6,8 @@
 
 #include "smart_random_sampler.h"
 
-namespace decord {
+namespace peli {
 namespace sampler {
 
 }  // sampler
-}  // decord
+}  // peli
