@@ -37,22 +37,16 @@ minimum-version = "0.10"
 cmake.version = ">=3.18"
 build-dir = "build/{wheel_tag}"
 wheel.packages = ["python/peli"]
-# Strip the dev artifacts; keep only what users need
 install.components = ["python"]
 build.verbose = true
 
 [tool.cibuildwheel]
 build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
-# Skip 32-bit, musllinux, and PyPy for v0.1.
 skip = ["*-manylinux_i686", "*-musllinux_*", "pp*", "*-win32"]
 build-verbosity = 1
 test-command = "python -c \"import peli; vr = peli.VideoReader(r'{project}/examples/count.mov'); assert len(vr) == 143; print('ok', len(vr), 'frames')\""
 
 [tool.cibuildwheel.linux]
-# manylinux_2_28's EPEL ships FFmpeg 4.x, which predates the libavcodec/bsf.h
-# split (FFmpeg 5.0). peli requires FFmpeg 5+, so we build a minimal LGPL
-# FFmpeg from source in before-all instead. Build cost is amortized across
-# the per-Python-version wheel matrix because before-all runs once per OS.
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
 environment = { PKG_CONFIG_PATH = "/usr/local/lib/pkgconfig", LD_LIBRARY_PATH = "/usr/local/lib" }
@@ -67,18 +61,11 @@ before-all = [
 repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
-# Homebrew's current FFmpeg dylibs target macOS 14.0, so the wheel's
-# deployment target must match or be higher (delocate refuses otherwise).
-# This excludes macOS <14, which we accept for v0.1 — most ML users on
-# Apple Silicon are on Sonoma+ anyway. Future option: build FFmpeg from
-# source to lower the target.
 before-all = ["brew install ffmpeg"]
 environment = { MACOSX_DEPLOYMENT_TARGET = "14.0" }
 archs = ["x86_64", "arm64"]
 
 [tool.cibuildwheel.windows]
-# vcpkg ships a static FFmpeg build that links cleanly against MSVC.
-# delvewheel vendors the runtime DLLs into the wheel.
 before-all = [
     "vcpkg install ffmpeg:x64-windows",
 ]

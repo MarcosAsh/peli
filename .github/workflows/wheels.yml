@@ -57,8 +57,6 @@ jobs:
           name: sdist
           path: dist/*.tar.gz
 
-  # Uncomment once the project has a PyPI account and a trusted-publisher
-  # configured for this repo.
   # publish:
   #   name: publish to PyPI
   #   needs: [build_wheels, build_sdist]

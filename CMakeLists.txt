@@ -131,10 +131,6 @@ if(GTEST_LIB)
   message(STATUS "Build with: " ${NUM_TESTS}  " tests")
 endif()
 
-# Installation rules.
-# When scikit-build-core drives the wheel build, the COMPONENT python install
-# places libpeli.{so,dylib,dll} inside the peli package directory so libinfo.py
-# finds it via ffi_dir/.. lookup.
 install(TARGETS peli
     LIBRARY DESTINATION peli COMPONENT python
     RUNTIME DESTINATION peli COMPONENT python)

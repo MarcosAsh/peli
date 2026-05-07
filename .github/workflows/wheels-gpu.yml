@@ -1,21 +1,5 @@
 name: wheels-gpu
 
-# v0.2 scaffolding for the peli-gpu (NVDEC) wheel pipeline.
-#
-# What this does today:
-#   - Builds peli with USE_CUDA=ON inside a NVIDIA CUDA-devel container.
-#   - Verifies the C extension links against libnvcuvid (no GPU runtime tests
-#     here — GitHub-hosted runners don't have NVIDIA GPUs).
-#   - Uploads the resulting .whl as a workflow artifact for inspection.
-#
-# What this does NOT do yet (v0.2.x):
-#   - Publish to PyPI as `peli-gpu` (we'd need a renamed pyproject + trusted-publisher).
-#   - Run GPU smoke tests (need self-hosted runner or Modal-based step).
-#   - Multi-CUDA / multi-Python matrix.
-#
-# Trigger via the Actions tab > "wheels-gpu" > "Run workflow", or by pushing
-# a tag matching `v*-gpu`.
-
 on:
   workflow_dispatch:
   push:
@@ -28,14 +12,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Single point in the matrix until the basic pipeline is green.
         cuda: ["12.6.3"]
         python: ["3.12"]
 
     container:
       image: nvidia/cuda:${{ matrix.cuda }}-cudnn-devel-ubuntu24.04
-      # No --gpus runtime here; we only need the dev toolkit, not a runtime
-      # GPU. Build is hardware-independent; libnvcuvid resolves at load time.
 
     steps:
       - name: Install Python and build deps
@@ -54,8 +35,6 @@ jobs:
           submodules: recursive
 
       - name: Symlink libnvcuvid for build-time linking
-        # The CUDA-devel image ships libnvcuvid stubs at /usr/local/cuda/lib64/stubs/.
-        # CMake's find_library wants an unversioned libnvcuvid.so on the search path.
         run: |
           ls -la /usr/local/cuda/lib64/stubs/libnvcuvid.so 2>&1 || true
           if [ -f /usr/local/cuda/lib64/stubs/libnvcuvid.so ]; then

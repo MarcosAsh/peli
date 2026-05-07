@@ -31,12 +31,6 @@ _CUDART = None
 
 
 def _cuda_device_synchronize():
-    """Best-effort cudaDeviceSynchronize() via libcudart, lazy-loaded.
-
-    On CPU-only systems libcudart is absent and this becomes a no-op. We
-    never raise from here: the worst case is the existing pre-stream-sync
-    behavior, which is correct when the producer is idle (the common case).
-    """
     global _CUDART
     if _CUDART is False:
         return
@@ -272,18 +266,7 @@ class NDArrayBase(_NDArrayBase):
         return str(self.asnumpy())
 
     def __dlpack__(self, stream=None, max_version=None, dl_device=None, copy=None):
-        # DLPack v0.5+ accepts a stream arg so the producer can synchronize
-        # the consumer's stream with the producer's work. For CUDA buffers,
-        # we conservatively cudaDeviceSynchronize() to guarantee that any
-        # pending decode/conversion on the producer stream is complete before
-        # the consumer adopts the pointer. This is a heavier hammer than a
-        # per-stream cudaStreamWaitEvent, but it's correct and cheap when
-        # the producer is already idle (the common case for vr[i] which
-        # waits for the decode result before returning).
-        # Future v0.2.x optimization: record an event on the producer stream
-        # at NDArray construction time and make the consumer's stream wait
-        # on it instead of a global sync.
-        if self.ctx.device_type == 2:  # kDLCUDA
+        if self.ctx.device_type == 2:
             _cuda_device_synchronize()
         return self.to_dlpack()
 
