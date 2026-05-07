@@ -8,7 +8,7 @@ A video decoder for ML training pipelines. Open a video, index into it, get back
 - [PyAV](https://github.com/PyAV-Org/PyAV) is too low-level for indexed random access.
 - [DALI](https://github.com/NVIDIA/DALI) and [PyNvVideoCodec](https://github.com/NVIDIA/PyNvVideoCodec) are NVIDIA-only and GPU-only.
 
-`peli` is a fork of decord, modernized for FFmpeg 7+/8 and Python 3.10–3.14, rebuilt around DLPack rather than a per-framework bridge system. v0.1 is CPU-first with first-class indexed random access; v0.2 adds NVDEC GPU decode.
+`peli` is a fork of decord, modernized for FFmpeg 7+/8 and Python 3.10–3.14, rebuilt around DLPack rather than a per-framework bridge system. v0.1 is CPU-first with first-class indexed random access; v0.2 adds NVDEC GPU decode (prototype already decodes 310 frames on an L4 with `__dlpack_device__` correctly reporting `kDLCUDA`).
 
 ## Status
 
@@ -24,7 +24,7 @@ A video decoder for ML training pipelines. Open a video, index into it, get back
 | `output="numpy"` / `"dlpack"` constructor kwarg                     | working                                 |
 | `output="torch"` / `"jax"` / `"tf"` / `"keras"` constructor kwarg   | working (lazy import; not unit-tested)  |
 | `AudioReader` (FFmpeg 7+ channel-layout migration done, untested)   | v0.2                                    |
-| NVDEC GPU decode (CUDA 12+, returns CUDA tensors via DLPack)        | v0.2                                    |
+| NVDEC GPU decode (CUDA 12+, returns CUDA tensors via DLPack)        | v0.2 (prototype green on L4, see below) |
 | VideoToolbox / AMD GPU decode                                       | v0.3+                                   |
 | Cross-platform wheels (`pip install peli`)                          | v0.1+                                   |
 
