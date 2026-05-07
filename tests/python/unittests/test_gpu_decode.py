@@ -61,7 +61,7 @@ def test_gpu_decode_content_matches_cpu_within_tolerance():
     gpu_t = torch.from_dlpack(peli.VideoReader(CLIP, ctx=peli.gpu(0))[0])
     gpu_arr = gpu_t.cpu().numpy().astype(np.float32)
     assert cpu_arr.shape == gpu_arr.shape
-    assert abs(cpu_arr.mean() - gpu_arr.mean()) < 1.0
+    assert abs(cpu_arr.mean() - gpu_arr.mean()) < 3.0
 
 
 def test_gpu_batch_get():

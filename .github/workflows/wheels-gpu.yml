@@ -27,8 +27,8 @@ jobs:
             build-essential cmake git pkg-config curl \
             libavcodec-dev libavformat-dev libavutil-dev \
             libswresample-dev libavfilter-dev libavdevice-dev
-          curl -sS https://bootstrap.pypa.io/get-pip.py | python${{ matrix.python }}
-          python${{ matrix.python }} -m pip install --upgrade pip build wheel
+          curl -sS https://bootstrap.pypa.io/get-pip.py | python${{ matrix.python }} - --break-system-packages
+          python${{ matrix.python }} -m pip install --break-system-packages --upgrade pip build wheel
 
       - uses: actions/checkout@v4
         with:
@@ -51,7 +51,7 @@ jobs:
 
       - name: Show wheel contents and CUDA symbol summary
         run: |
-          python${{ matrix.python }} -m pip install wheel
+          python${{ matrix.python }} -m pip install --break-system-packages wheel
           for whl in dist/*.whl; do
             echo "== $whl =="
             python${{ matrix.python }} -m wheel unpack "$whl" --dest /tmp/unpacked
