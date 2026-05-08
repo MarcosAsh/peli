@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "peli"
-version = "0.1.0"
+version = "0.1.1"
 description = "Backend-agnostic video decoder for ML frameworks (NumPy/PyTorch/JAX/TF/Keras via DLPack). Fork of dmlc/decord."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -70,7 +70,6 @@ before-all = [
     "vcpkg install ffmpeg:x64-windows",
 ]
 environment = { CMAKE_TOOLCHAIN_FILE = "C:/vcpkg/scripts/buildsystems/vcpkg.cmake" }
-repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
