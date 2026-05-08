@@ -34,6 +34,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Rename project to peli-gpu
+        run: sed -i 's/^name = "peli"$/name = "peli-gpu"/' pyproject.toml
+
       - name: Symlink libnvcuvid for build-time linking
         run: |
           ls -la /usr/local/cuda/lib64/stubs/libnvcuvid.so 2>&1 || true
@@ -64,3 +67,21 @@ jobs:
           name: peli-gpu-cuda${{ matrix.cuda }}-py${{ matrix.python }}
           path: dist/*.whl
           retention-days: 30
+
+  publish:
+    name: publish to PyPI
+    needs: build_gpu_wheel
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') && endsWith(github.ref, '-gpu')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/peli-gpu
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: "peli-gpu-*"
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
